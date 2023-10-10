@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <RepoRootDirectory>$(MSBuildThisFileDirectory)artifacts\</RepoRootDirectory>
+  </PropertyGroup>
+</Project>

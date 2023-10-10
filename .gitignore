@@ -421,6 +421,7 @@ codecov/
 # Fable
 *.fs.js
 *.map
+fable_modules/
 
 # Paket/NuGet
 packages/

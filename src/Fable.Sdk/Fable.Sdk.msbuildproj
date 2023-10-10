@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.Build.NoTargets">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageType>MSBuildSdk</PackageType>
+    <!-- Suppress generation of an unneeded <dependencies> element (it has a targetFramework which doesn't make sense in a content-only package) -->
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="Sdk\Sdk.props" PackagePath="Sdk\" />
+    <Content Include="Sdk\Sdk.targets" PackagePath="Sdk\" />
+    <Content Include="readme.md" PackagePath="\" />
+  </ItemGroup>
+</Project>

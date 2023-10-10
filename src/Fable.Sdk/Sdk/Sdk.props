@@ -1,0 +1,7 @@
+<Project>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" Condition="'$(MicrosoftCommonPropsHasBeenImported)' != 'true'"/>
+
+  <PropertyGroup>
+    <UsingFableSdk>true</UsingFableSdk>
+  </PropertyGroup>
+</Project>

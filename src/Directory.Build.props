@@ -1,0 +1,8 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('$(MSBuildThisFile)', '$(MSBuildThisFileDirectory)../'))" />
+  
+  <PropertyGroup>
+    <PackageOutputPath>$(RepoRootDirectory)</PackageOutputPath>
+    <Version>0.0.1</Version>
+  </PropertyGroup>
+</Project>

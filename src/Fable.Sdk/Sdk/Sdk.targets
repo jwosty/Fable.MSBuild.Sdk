@@ -1,0 +1,7 @@
+<Project>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" Condition=" '$(CommonTargetsPath)' == '' " />
+
+  <Target Name="CustomTarget" BeforeTargets="Build">
+    <Message Importance="high" Text="Custom Fable Target" />
+  </Target>
+</Project>
