@@ -1,6 +1,8 @@
 <Project Sdk="Fable.Sdk/0.0.1">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+<!--    <TargetFramework>netstandard2.0</TargetFramework>-->
+<!--    <TargetFrameworks>netstandard2.0;fable4</TargetFrameworks>-->
+    <TargetFramework>fable4</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="App.fs" />
