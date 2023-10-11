@@ -1,6 +1,7 @@
 <Project>
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" Condition="'$(MicrosoftCommonPropsHasBeenImported)' != 'true'"/>
-
+  <Import Project="$(MSBuildThisFileDirectory)..\build\Fable.Sdk.Tasks.props" />
+  
   <PropertyGroup>
     <UsingFableSdk>true</UsingFableSdk>
   </PropertyGroup>

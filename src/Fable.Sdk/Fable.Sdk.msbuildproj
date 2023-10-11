@@ -1,13 +1,27 @@
 <Project Sdk="Microsoft.Build.NoTargets">
+  
   <PropertyGroup>
+    <PackageId>Fable.Sdk</PackageId>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageType>MSBuildSdk</PackageType>
+    
+    <NoWarn>NU5128</NoWarn>
     <!-- Suppress generation of an unneeded <dependencies> element (it has a targetFramework which doesn't make sense in a content-only package) -->
-    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <!-- <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking> -->
   </PropertyGroup>
+  
   <ItemGroup>
     <Content Include="Sdk\Sdk.props" PackagePath="Sdk\" />
     <Content Include="Sdk\Sdk.targets" PackagePath="Sdk\" />
-    <Content Include="readme.md" PackagePath="\" />
+    <None Include="..\..\Readme.md" Pack="true" PackagePath="\" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Fable.Sdk.Tasks\Fable.Sdk.Tasks.fsproj" PrivateAssets="all" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="NuGetizer" Version="1.1.1" />
+  </ItemGroup>
+  
 </Project>

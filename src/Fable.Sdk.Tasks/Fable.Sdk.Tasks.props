@@ -1,0 +1,6 @@
+<Project>
+    <PropertyGroup>
+        <_FableSdkTasksTFMPath>netstandard2.0\any</_FableSdkTasksTFMPath>
+        <_FableSdkTasksPath>$(MSBuildThisFileDirectory)..\tools\$(_FableSdkTasksTFMPath)\</_FableSdkTasksPath>
+    </PropertyGroup>
+</Project>

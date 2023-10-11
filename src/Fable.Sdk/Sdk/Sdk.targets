@@ -1,7 +1,10 @@
 <Project>
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" Condition=" '$(CommonTargetsPath)' == '' " />
 
+  <UsingTask TaskName="Fable.Sdk.Tasks.Greet" AssemblyFile="$(_FableSdkTasksPath)Fable.Sdk.Tasks.dll" />
+  
   <Target Name="CustomTarget" BeforeTargets="Build">
     <Message Importance="high" Text="Custom Fable Target" />
+    <Greet Name="John"/>
   </Target>
 </Project>
