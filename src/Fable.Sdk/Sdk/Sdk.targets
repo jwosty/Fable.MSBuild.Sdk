@@ -1,28 +1,4 @@
 <Project>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'fable4'">
-    <TargetFramework>fable4</TargetFramework>
-    <TargetFrameworkIdentifier>Fable</TargetFrameworkIdentifier>
-    <TargetFrameworkVersion>4.0</TargetFrameworkVersion>
-    <TargetPlatformIdentifier>fable</TargetPlatformIdentifier>
-    <TargetPlatformVersion>4.0</TargetPlatformVersion>
-  </PropertyGroup>
-  
+  <Import Project="$(MSBuildThisFileDirectory)..\Build\Core.targets" />
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" Condition=" '$(CommonTargetsPath)' == '' " />
-  
-  <UsingTask TaskName="Fable.Sdk.Tasks.Greet" AssemblyFile="$(_FableSdkTasksPath)Fable.Sdk.Tasks.dll" />
-  <UsingTask TaskName="Fable.Sdk.Tasks.RedirectFablePackageTargets" AssemblyFile="$(_FableSdkTasksPath)Fable.Sdk.Tasks.dll" />
-
-  <Target Name="_RedirectFableRestoreGraph" BeforeTargets="Restore" DependsOnTargets="_GenerateProjectRestoreGraph">
-    <Message Importance="high" Text="_RestoreGraphEntry: @(_RestoreGraphEntry)" />
-    <RedirectFablePackageTargets 
-            RestoreGraphItems="@(_RestoreGraphEntry)"
-            ReplacementTargetFramework="$(TargetFramework)">
-      <Output TaskParameter="AdjustedRestoreGraphItems" ItemName="_RestoreGraphEntry" />
-    </RedirectFablePackageTargets>
-  </Target>
-  
-  <Target Name="CustomTarget" BeforeTargets="Build">
-    <Message Importance="high" Text="Custom Fable Target" />
-    <Greet Name="John"/>
-  </Target>
 </Project>

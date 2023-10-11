@@ -1,13 +1,9 @@
 <Project>
-  <Import Project="$(MSBuildThisFileDirectory)..\build\Fable.Sdk.Tasks.props" />
-  
   <PropertyGroup>
     <UsingFableSdk>true</UsingFableSdk>
   </PropertyGroup>
-  
-  <ItemGroup>
-    <SupportedTargetFramework Include="Fable,Version=v4.0" DisplayName="Fable 4.0" Alias="fable4.0" />
-  </ItemGroup>
-  
+
+  <Import Project="$(MSBuildThisFileDirectory)..\Build\Fable.Sdk.Tasks.props" />
+  <Import Project="$(MSBuildThisFileDirectory)..\Build\Core.props" />
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" Condition="'$(MicrosoftCommonPropsHasBeenImported)' != 'true'"/>
 </Project>

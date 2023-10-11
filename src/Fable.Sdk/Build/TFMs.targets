@@ -1,0 +1,13 @@
+<Project>
+    <PropertyGroup Condition="'$(TargetFramework)' == 'fable4'">
+        <TargetFramework>fable4</TargetFramework>
+        <TargetFrameworkIdentifier>Fable</TargetFrameworkIdentifier>
+        <TargetFrameworkVersion>4.0</TargetFrameworkVersion>
+        <TargetPlatformIdentifier>fable</TargetPlatformIdentifier>
+        <!--    <TargetPlatformVersion>1.0</TargetPlatformVersion>-->
+    </PropertyGroup>
+
+    <ItemGroup>
+        <SupportedTargetFramework Include="Fable,Version=v4.0" DisplayName="Fable 4.0" Alias="fable4.0" />
+    </ItemGroup>
+</Project>
