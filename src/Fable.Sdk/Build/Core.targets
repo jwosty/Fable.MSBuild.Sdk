@@ -1,6 +1,10 @@
 <Project>
     <Import Project="$(MSBuildThisFileDirectory)TFMs.targets" />
 
+    <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
+        <AssetTargetFallback>$(AssetTargetFallback);netstandard2.0;netstandard2.1;net7.0;net6.0;net5.0</AssetTargetFallback>
+    </PropertyGroup>
+    
     <UsingTask TaskName="Fable.Sdk.Tasks.Greet" AssemblyFile="$(_FableSdkTasksPath)Fable.Sdk.Tasks.dll" />
     <UsingTask TaskName="Fable.Sdk.Tasks.RedirectFablePackageTargets" AssemblyFile="$(_FableSdkTasksPath)Fable.Sdk.Tasks.dll" />
 

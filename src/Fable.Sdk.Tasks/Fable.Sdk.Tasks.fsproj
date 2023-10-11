@@ -19,7 +19,6 @@
       <DefaultPackFolder>content</DefaultPackFolder>
       <BuildAction>Compile</BuildAction>
     </Compile>
-    <Compile Include="FableTask.fs" />
     <None Include="..\..\Readme.md" Pack="true" PackagePath="\" />
     <Content Include="Fable.Sdk.Tasks.props" PackFolder="build" />
   </ItemGroup>

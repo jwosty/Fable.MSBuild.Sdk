@@ -2,7 +2,7 @@
   <PropertyGroup>
 <!--    <TargetFramework>netstandard2.0</TargetFramework>-->
 <!--    <TargetFrameworks>netstandard2.0;fable4</TargetFrameworks>-->
-    <TargetFramework>fable4</TargetFramework>
+    <TargetFramework>fable4.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="App.fs" />

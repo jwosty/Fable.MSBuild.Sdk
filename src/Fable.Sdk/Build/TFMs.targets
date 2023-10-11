@@ -1,13 +1,26 @@
 <Project>
-    <PropertyGroup Condition="'$(TargetFramework)' == 'fable4'">
-        <TargetFramework>fable4</TargetFramework>
-        <TargetFrameworkIdentifier>Fable</TargetFrameworkIdentifier>
-        <TargetFrameworkVersion>4.0</TargetFrameworkVersion>
-        <TargetPlatformIdentifier>fable</TargetPlatformIdentifier>
-        <!--    <TargetPlatformVersion>1.0</TargetPlatformVersion>-->
-    </PropertyGroup>
-
     <ItemGroup>
         <SupportedTargetFramework Include="Fable,Version=v4.0" DisplayName="Fable 4.0" Alias="fable4.0" />
     </ItemGroup>
+    
+    <PropertyGroup Condition="'$(TargetFramework)' == 'fable4.0'">
+        <TargetFramework>fable4</TargetFramework>
+        <TargetFrameworkIdentifier>Fable</TargetFrameworkIdentifier>
+        <TargetFrameworkVersion>4.0</TargetFrameworkVersion>
+    </PropertyGroup>
+    
+    <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
+        <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">js</RuntimeIdentifier>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
+        <TargetPlatformIdentifier Condition="'$(RuntimeIdentifier)' == 'javascript'">js</TargetPlatformIdentifier>
+    </PropertyGroup>
+    
+<!--    <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable' and '$(TargetPlatformIdentifier)' == 'javascript'">-->
+<!--        <SupportedPlatform Remove="@(SupportedPlatform)" />-->
+<!--        <SupportedPlatform Include="javascript" />-->
+<!--    </ItemGroup>-->
+    
+
 </Project>
