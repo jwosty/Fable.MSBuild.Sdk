@@ -1,8 +1,19 @@
 <Project>
     <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
         <AssetTargetFallback>$(AssetTargetFallback);netstandard2.1;netstandard2.0;net7.0;net6.0;net5.0</AssetTargetFallback>
-        <CopyLocalRuntimeTargetAssets>true</CopyLocalRuntimeTargetAssets>
+<!--        <CopyLocalRuntimeTargetAssets>true</CopyLocalRuntimeTargetAssets>-->
     </PropertyGroup>
+    
+    <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
+        <_EnableDefaultWindowsPlatform>false</_EnableDefaultWindowsPlatform>
+        <!-- Prevent the .NET SDK from attempting to include mscorlib.dll -->
+        <NoStdLib Condition="'$(NoStdLib)' == ''">true</NoStdLib>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <!-- Prevent the .NET SDK from trying to copy these -->
+        <IntermediateAssembly Remove="@(IntermediateAssembly)" />
+    </ItemGroup>
     
     <UsingTask TaskName="Fable.Sdk.Tasks.Greet" AssemblyFile="$(_FableSdkTasksPath)Fable.Sdk.Tasks.dll" />
     <UsingTask TaskName="Fable.Sdk.Tasks.RedirectFablePackageTargets" AssemblyFile="$(_FableSdkTasksPath)Fable.Sdk.Tasks.dll" />
@@ -15,16 +26,8 @@
         <Message Importance="high" Text="TargetPlatformVersion = $(TargetPlatformVersion)" />
         <Message Importance="high" Text="RuntimeIdentifier = $(RuntimeIdentifier)" />
     </Target>
-
-    <!--  <Target Name="_RedirectFableRestoreGraph" BeforeTargets="Restore" DependsOnTargets="_GenerateProjectRestoreGraph">-->
-    <!--    <Message Importance="high" Text="_RestoreGraphEntry: @(_RestoreGraphEntry)" />-->
-    <!--    <RedirectFablePackageTargets -->
-    <!--            RestoreGraphItems="@(_RestoreGraphEntry)"-->
-    <!--            ReplacementTargetFramework="$(TargetFramework)">-->
-    <!--      <Output TaskParameter="AdjustedRestoreGraphItems" ItemName="_RestoreGraphEntry" />-->
-    <!--    </RedirectFablePackageTargets>-->
-    <!--  </Target>-->
     
-
-
+    <Target Name="CoreCompile">
+        <Message Importance="high" Text="THIS IS WHERE FABLE COMPILATION WOULD HAPPEN" />
+    </Target>
 </Project>

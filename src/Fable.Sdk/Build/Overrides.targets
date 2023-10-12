@@ -1,7 +1,7 @@
 <Project>
     <!--
-        I'm sure all of these forceful have a butterfly effect, but hey, this is a POC, so just do whatever it takes
-        to make it not blow up for now. Real fixes are welcome.
+        I'm sure all of these forceful overrides have a butterfly effect, but hey, this is a POC, so just do whatever it
+        takes to make it not blow up for now. Real fixes are welcome.
     -->
     
     <!--
