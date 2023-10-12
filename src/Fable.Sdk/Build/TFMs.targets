@@ -1,20 +1,13 @@
 <Project>
-    <ItemGroup>
-        <SupportedTargetFramework Include="Fable,Version=v4.0" DisplayName="Fable 4.0" Alias="fable4.0" />
-    </ItemGroup>
-    
     <PropertyGroup Condition="'$(TargetFramework)' == 'fable4.0'">
-        <TargetFramework>fable4</TargetFramework>
         <TargetFrameworkIdentifier>Fable</TargetFrameworkIdentifier>
         <TargetFrameworkVersion>4.0</TargetFrameworkVersion>
     </PropertyGroup>
     
     <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
+        <_EnableDefaultWindowsPlatform>false</_EnableDefaultWindowsPlatform>
         <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">js</RuntimeIdentifier>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
-        <TargetPlatformIdentifier Condition="'$(RuntimeIdentifier)' == 'javascript'">js</TargetPlatformIdentifier>
+        <TargetPlatformIdentifier Condition="'$(RuntimeIdentifier)' == 'js'">js</TargetPlatformIdentifier>
     </PropertyGroup>
     
 <!--    <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable' and '$(TargetPlatformIdentifier)' == 'javascript'">-->

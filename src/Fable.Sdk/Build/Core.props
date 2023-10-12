@@ -1,2 +1,5 @@
 <Project>
+    <ItemGroup>
+        <SupportedTargetFramework Include="Fable,Version=v4.0" DisplayName="Fable 4.0" Alias="fable4.0" />
+    </ItemGroup>
 </Project>

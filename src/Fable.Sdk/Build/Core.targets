@@ -1,8 +1,7 @@
 <Project>
-    <Import Project="$(MSBuildThisFileDirectory)TFMs.targets" />
-
     <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
-        <AssetTargetFallback>$(AssetTargetFallback);netstandard2.0;netstandard2.1;net7.0;net6.0;net5.0</AssetTargetFallback>
+        <AssetTargetFallback>$(AssetTargetFallback);netstandard2.1;netstandard2.0;net7.0;net6.0;net5.0</AssetTargetFallback>
+        <CopyLocalRuntimeTargetAssets>true</CopyLocalRuntimeTargetAssets>
     </PropertyGroup>
     
     <UsingTask TaskName="Fable.Sdk.Tasks.Greet" AssemblyFile="$(_FableSdkTasksPath)Fable.Sdk.Tasks.dll" />
@@ -14,6 +13,7 @@
         <Message Importance="high" Text="TargetFrameworkVersion = $(TargetFrameworkVersion)" />
         <Message Importance="high" Text="TargetPlatformIdentifier = $(TargetPlatformIdentifier)" />
         <Message Importance="high" Text="TargetPlatformVersion = $(TargetPlatformVersion)" />
+        <Message Importance="high" Text="RuntimeIdentifier = $(RuntimeIdentifier)" />
     </Target>
 
     <!--  <Target Name="_RedirectFableRestoreGraph" BeforeTargets="Restore" DependsOnTargets="_GenerateProjectRestoreGraph">-->
@@ -24,9 +24,7 @@
     <!--      <Output TaskParameter="AdjustedRestoreGraphItems" ItemName="_RestoreGraphEntry" />-->
     <!--    </RedirectFablePackageTargets>-->
     <!--  </Target>-->
+    
 
-    <Target Name="CustomTarget" BeforeTargets="Build">
-        <Message Importance="high" Text="Custom Fable Target" />
-        <Greet Name="John"/>
-    </Target>
+
 </Project>

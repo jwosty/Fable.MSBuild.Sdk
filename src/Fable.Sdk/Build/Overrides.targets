@@ -1,0 +1,26 @@
+<Project>
+    <!--
+        I'm sure all of these forceful have a butterfly effect, but hey, this is a POC, so just do whatever it takes
+        to make it not blow up for now. Real fixes are welcome.
+    -->
+    
+    <!--
+        FIXME: (error MSB3644): This blows up with
+            error MSB3644: The reference assemblies for Fable,Version=v4.0 were not found
+        so skip it for now 
+    -->
+    <Target Name="GetReferenceAssemblyPaths" />
+    
+    <!--
+        FIXME: (error NETSDK1005): This blows up with
+            error NETSDK1005: Assets file obj/project.assets.json doesn't have a target for 'fable4.0'
+        so just skip it for now. I'm suspicious this has something to do with NuGet not having our custom TFM in its
+        hardcoded logic, causing it to behave differently than for net7.0 for example. I've tried playing with
+        the NuGetTargetMoniker property, but it seems to already get set correctly. I've also tried manually editing
+        project.assets.json and replacing all instances of 'Fable,Version=4.0' with 'fable4.0' or even 'fable40':
+        no cigar.
+        
+        I like my package assets unresolved anyway...
+    -->
+    <Target Name="ResolvePackageAssets" />
+</Project>

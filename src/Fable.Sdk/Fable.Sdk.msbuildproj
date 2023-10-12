@@ -14,6 +14,7 @@
     <None Include="Build\Core.props" PackagePath="Build\" />
     <None Include="Build\Core.targets" PackagePath="Build\" />
     <None Include="Build\TFMs.targets" PackagePath="Build\" />
+    <None Include="Build\Overrides.targets" PackagePath="Build\" />
     <None Include="Sdk\Sdk.props" PackagePath="Sdk\" />
     <None Include="Sdk\Sdk.targets" PackagePath="Sdk\" />
     <None Include="..\..\Readme.md" Pack="true" PackagePath="\" />

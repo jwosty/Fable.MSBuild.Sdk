@@ -1,4 +1,6 @@
 <Project>
+  <Import Project="$(MSBuildThisFileDirectory)..\Build\TFMs.targets" />
   <Import Project="$(MSBuildThisFileDirectory)..\Build\Core.targets" />
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" Condition=" '$(CommonTargetsPath)' == '' " />
+  <Import Project="$(MSBuildThisFileDirectory)..\Build\Overrides.targets" />
 </Project>
