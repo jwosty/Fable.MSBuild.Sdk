@@ -5,11 +5,17 @@ open System.Collections.Concurrent
 open System.Diagnostics
 open System.IO
 open System.Reflection
+open System.Runtime.ExceptionServices
 open System.Threading
+open System.Threading.Tasks
 open Microsoft.Build.Framework
 open Microsoft.Build.Utilities
 open Fable.Sdk.Tasks.Patterns
 open Microsoft.FSharp.Control
+
+type SysTask = System.Threading.Tasks.Task
+type SysTask<'T> = System.Threading.Tasks.Task<'T>
+type MsbTask = Microsoft.Build.Utilities.Task
 
 type FableCompile() =
     inherit Task()
@@ -44,26 +50,41 @@ type FableCompile() =
         startInfo.RedirectStandardOutput <- Option.isSome onStdOutLineRecieved || Option.isSome stdoutAltOutput
         startInfo.RedirectStandardError <- Option.isSome onStdErrLineRecieved || Option.isSome stderrAltOutput
         
-        this.Log.LogMessage (MessageImportance.High, "Running process: {0} {0}", fileName, defaultArg arguments "")
+        this.Log.LogMessage (MessageImportance.High, "Running process: {0} {1}", fileName, defaultArg arguments "")
         use proc = Process.Start startInfo
         use stdOut =
             match stdoutAltOutput with
-            | Some stdoutAltOutput -> new TeeTextReader(proc.StandardOutput, stdoutAltOutput, leaveOutputOpen = true) : TextReader
+            | Some stdoutAltOutput -> new TeeTextReader(proc.StandardOutput, stdoutAltOutput, leaveOutputOpen = true, name = "<stdout>") : TextReader
             | None -> proc.StandardOutput
-        onStdOutLineRecieved |> Option.iter (fun f ->
-            TextReaderBatcher.SubscribeTextReceived (stdOut, f)
-        )
+        let stdOutWorker =
+            match onStdOutLineRecieved with
+            | Some f -> TextReaderBatcher.ProcessTextAsync (stdOut, f, name = "<stdout>") : SysTask
+            | None -> Task.CompletedTask
         use stdErr =
             match stderrAltOutput with
-            | Some stderrAltOutput -> new TeeTextReader(proc.StandardError, stderrAltOutput, leaveOutputOpen = true) : TextReader
-            | None -> proc.StandardOutput
-        onStdErrLineRecieved |> Option.iter (fun f ->
-            TextReaderBatcher.SubscribeTextReceived (stdErr, f)
-        )
+            | Some stderrAltOutput -> new TeeTextReader(proc.StandardError, stderrAltOutput, leaveOutputOpen = true, name = "<stderr>") : TextReader
+            | None -> proc.StandardError
+        let stdErrWorker =
+            match onStdErrLineRecieved with
+            | Some f -> TextReaderBatcher.ProcessTextAsync (stdErr, f, name = "<stderr>") : SysTask
+            | None -> Task.CompletedTask
         
-        do! proc.WaitForExitAsync (?cancellationToken = cancellationToken)
+        try
+            do! Task.WhenAll [
+                proc.WaitForExitAsync (?cancellationToken = cancellationToken)
+                stdOutWorker
+                stdErrWorker
+            ]
+        with e ->
+            ExceptionDispatchInfo.Throw(e)
         
-        do! Async.Sleep 5000
+        match stdoutAltOutput with
+        | Some w -> do! w.FlushAsync ()
+        | None -> ()
+        
+        match stderrAltOutput with
+        | Some w -> do! w.FlushAsync ()
+        | None -> ()
         
         return proc.ExitCode
     }
@@ -74,34 +95,44 @@ type FableCompile() =
         else
             let dotnetEntry = Process.GetCurrentProcess().MainModule.FileName
             
-            use fableLogFileWriter = TextWriter.Synchronized(new StreamWriter(File.OpenWrite(this.FableLogFile)))
+            use fableLogFileWriter = TextWriter.Synchronized(new StreamWriter(File.OpenWrite(this.FableLogFile), AutoFlush = true))
             
             do! fableLogFileWriter.WriteLineAsync ("Before fable compile".AsMemory(), ?cancellationToken = cancellationToken)
             
-            let! exitCode =
-                this.RunProcessAsync (
-                    dotnetEntry, $"%s{this.FableToolDll} %s{this.InputFsproj}",
-                    onStdOutLineRecieved = (fun msg -> this.Log.LogMessage (MessageImportance.High, "{0}", msg)),
-                    stdoutAltOutput = TextWriter.Synchronized fableLogFileWriter,
-                    onStdErrLineRecieved = (fun msg -> this.Log.LogError ("{0}", msg)),
-                    ?cancellationToken = cancellationToken)
+            try
+                let! exitCode =
+                    this.RunProcessAsync (
+                        dotnetEntry, $"%s{this.FableToolDll} %s{this.InputFsproj}",
+                        // onStdOutLineRecieved = (fun msg -> this.Log.LogMessage (MessageImportance.High, "{0}", msg)),
+                        onStdOutLineRecieved = (fun msg -> Console.Write(msg)),
+                        stdoutAltOutput = fableLogFileWriter,
+                        // onStdErrLineRecieved = (fun msg -> this.Log.LogError ("{0}", msg)),
+                        onStdErrLineRecieved = (fun msg -> Console.Error.Write(msg)),
+                        stderrAltOutput = fableLogFileWriter,
+                        ?cancellationToken = cancellationToken)
+                
+                do! fableLogFileWriter.WriteLineAsync ("After fable compile".AsMemory(), ?cancellationToken = cancellationToken)
             
-            do! fableLogFileWriter.WriteLineAsync ("After fable compile".AsMemory(), ?cancellationToken = cancellationToken)
+                if exitCode = 0 then
+                    this.Log.LogMessage (MessageImportance.Normal, "Fable compilation succeeded")
+                else
+                    this.Log.LogError $"Fable compilation failed (exit code %d{exitCode})"
             
-            do! fableLogFileWriter.FlushAsync ()
-            
-            if exitCode = 0 then
-                this.Log.LogMessage (MessageImportance.Normal, "Fable compilation succeeded")
-            else
-                this.Log.LogError $"Fable compilation failed (exit code %d{exitCode})"
+            finally    
+                fableLogFileWriter.Flush ()
                 
         return not this.Log.HasLoggedErrors
     }
     
     override this.Execute () =
-        use _cts = new CancellationTokenSource()
-        cts <- Some _cts
-        (this.ExecuteAsync _cts.Token).Result
+        try
+            use _cts = new CancellationTokenSource()
+            cts <- Some _cts
+            (this.ExecuteAsync _cts.Token).Result
+        with e ->
+            // this.Log.LogErrorFromException (e, true, true, null)
+            this.Log.LogError (e.ToString())
+            false
         
     interface ICancelableTask with
         override this.Cancel () = cts |> Option.iter (fun cts -> cts.Cancel ())
