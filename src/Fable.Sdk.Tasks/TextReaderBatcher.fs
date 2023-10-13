@@ -15,7 +15,7 @@ type private BatchedTextReaderMessage =
     | End
 
 type internal TextReaderBatcher() =
-    static member ProcessTextAsync (reader: TextReader, onTextReceived: string -> unit, ?chunkSizeHint: int, ?maxBufferSizeHint: int, ?batchEndWait: TimeSpan, ?cancellationToken: CancellationToken) = task {
+    static member ProcessTextAsync (reader: TextReader, onTextReceived: string -> unit, ?trimSingleTrailingNewline: bool, ?chunkSizeHint: int, ?maxBufferSizeHint: int, ?batchEndWait: TimeSpan, ?cancellationToken: CancellationToken) = task {
         let batchEndWait = defaultArg batchEndWait (TimeSpan.FromSeconds 3)
         
         let chunkSizeHint = defaultArg chunkSizeHint 4096
@@ -25,6 +25,15 @@ type internal TextReaderBatcher() =
         let sb = StringBuilder(maxBufferSizeHint)
         
         let processTextEvent (event: BatchedTextReaderMessage) =
+            let getStr (sb: StringBuilder) =
+                let z = if sb.Length > 0 then Some (sb[sb.Length - 1]) else None
+                let y = if sb.Length > 1 then Some (sb[sb.Length - 2]) else None
+                match y, z with
+                | Some '\r', Some '\n'          -> sb.Length <- sb.Length - 2
+                | _,         Some ('\r' | '\n') -> sb.Length <- sb.Length - 1
+                | _,         _                  -> ()
+                ()
+            
             let text =
                 lock sync (fun () ->
                     let shouldFlush =
@@ -62,13 +71,12 @@ type internal TextReaderBatcher() =
                 timer.Change (batchEndWait, Timeout.InfiniteTimeSpan) |> ignore
                 let chunk = buffer.Memory.Slice(0, countRead)
                 processTextEvent (ReceivedText chunk)
-            
         }
         
         do! readLoop ()
         processTextEvent End
     }
     
-    static member SubscribeTextReceived (reader: TextReader, onTextReceived: string -> unit, ?chunkSizeHint: int, ?maxBufferSizeHint: int, ?batchEndWait: TimeSpan, ?cancellationToken: CancellationToken) =
-        Task.Run (fun () -> TextReaderBatcher.ProcessTextAsync (reader, onTextReceived, ?chunkSizeHint = chunkSizeHint, ?maxBufferSizeHint = maxBufferSizeHint, ?batchEndWait = batchEndWait, ?cancellationToken = cancellationToken) : Task)
+    static member SubscribeTextReceived (reader: TextReader, onTextReceived: string -> unit, ?trimSingleTrailingNewline: bool, ?chunkSizeHint: int, ?maxBufferSizeHint: int, ?batchEndWait: TimeSpan, ?cancellationToken: CancellationToken) =
+        Task.Run (fun () -> TextReaderBatcher.ProcessTextAsync (reader, onTextReceived, ?trimSingleTrailingNewline = trimSingleTrailingNewline, ?chunkSizeHint = chunkSizeHint, ?maxBufferSizeHint = maxBufferSizeHint, ?batchEndWait = batchEndWait, ?cancellationToken = cancellationToken) : Task)
         |> ignore

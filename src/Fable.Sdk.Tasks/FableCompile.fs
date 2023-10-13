@@ -14,7 +14,6 @@ open Microsoft.FSharp.Control
 type FableCompile() =
     inherit Task()
     
-    let mkDummyDisposable () = { new IDisposable with member this.Dispose () = () }
     let mutable cts = None
     
     [<Required>]
@@ -27,14 +26,8 @@ type FableCompile() =
     member val OutputFiles: ITaskItem[] = Array.empty with get
     
     member private this.StartProcess (startInfo: ProcessStartInfo) =
-        // let startInfo = ProcessStartInfo(FileName = fileName)
         this.Log.LogMessage (MessageImportance.High, "Running: {0}", startInfo.FileName, startInfo.Arguments)
         Process.Start startInfo
-        
-    // member private this.RunProcessAsync (startInfo: ProcessStartInfo, ?cancellationToken: CancellationToken) = task {
-    //     use proc = Process.Start startInfo
-    //     do! proc.WaitForExitAsync (?cancellationToken = cancellationToken)
-    // }
     
     member private this.RunProcessAsync (fileName: string, ?arguments: string, ?useShellExecute: bool, ?onStdOutLineRecieved: string -> unit, ?onStdErrLineRecieved: string -> unit, ?cancellationToken: CancellationToken) = task {
         let startInfo = ProcessStartInfo(FileName = fileName)
