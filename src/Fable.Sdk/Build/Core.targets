@@ -42,6 +42,7 @@
             Outputs="$(IntermediateFableFsproj)">
         <GenerateFableFsproj
             Sources="@(CompileBefore);@(Compile);@(CompileAfter)"
+            PackageReferences="@(PackageReference)"
             OutputFsproj="$(IntermediateFableFsproj)"
         />
     </Target>

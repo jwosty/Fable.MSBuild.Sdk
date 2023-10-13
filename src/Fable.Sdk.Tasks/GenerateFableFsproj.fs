@@ -1,5 +1,6 @@
 namespace Fable.Sdk.Tasks
 open System
+open System.Collections.Generic
 open System.IO
 open System.Reflection
 open System.Threading
@@ -11,12 +12,15 @@ type GenerateFableFsproj() =
     inherit Task()
     
     let indent = String.replicate 4 " "
-    let compileItemsStrSep = Environment.NewLine + indent
+    let itemStringSep = Environment.NewLine + indent
     
     let mutable cts: CancellationTokenSource option = None
         
     [<Required>]
     member val Sources: ITaskItem[] = Array.empty with get, set
+    
+    [<Required>]
+    member val PackageReferences: ITaskItem[] = Array.empty with get, set
     
     [<Required>]
     member val OutputFsproj: string = "" with get, set
@@ -30,7 +34,26 @@ type GenerateFableFsproj() =
             this.Sources
             |> Array.map (fun sourceFile -> Path.Combine ("..", sourceFile.ItemSpec))
             |> Array.map (fun sourceFile -> $"""<Compile Include="{sourceFile}" />""")
-        let compileItemsStr = compileItems |> String.concat compileItemsStrSep
+        let compileItemsStr = compileItems |> String.concat itemStringSep
+        
+        let packageReferences =
+            this.PackageReferences
+            |> Array.map (fun pkgRef ->
+                let customMetadataNonGeneric = pkgRef.CloneCustomMetadata()
+                let customMetadata =
+                    customMetadataNonGeneric.Keys
+                    |> Seq.cast<string>
+                    |> Seq.map (fun k -> k, string (customMetadataNonGeneric[k]))
+                let attrs =
+                    customMetadata
+                    |> Seq.map (fun (k,v) -> $"%s{k}=\"%s{v}\"")
+                    |> String.concat " "
+                $"""<PackageReference Include="%s{pkgRef.ItemSpec}" %s{attrs}/>"""
+            )
+        
+        let packageReferencesStr =
+            packageReferences
+            |> String.concat itemStringSep
         
         let fsprojText = $"""
 <Project Sdk="Microsoft.NET.Sdk">
@@ -39,7 +62,11 @@ type GenerateFableFsproj() =
 </PropertyGroup>
 
 <ItemGroup>
-  {compileItemsStr}
+    {compileItemsStr}
+</ItemGroup>
+
+<ItemGroup>
+    {packageReferencesStr}
 </ItemGroup>
 </Project>
 """
