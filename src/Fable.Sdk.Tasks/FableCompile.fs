@@ -54,19 +54,19 @@ type FableCompile() =
         use proc = Process.Start startInfo
         use stdOut =
             match stdoutAltOutput with
-            | Some stdoutAltOutput -> new TeeTextReader(proc.StandardOutput, stdoutAltOutput, leaveOutputOpen = true, name = "<stdout>") : TextReader
+            | Some stdoutAltOutput -> new TeeTextReader(proc.StandardOutput, stdoutAltOutput, leaveOutputOpen = true) : TextReader
             | None -> proc.StandardOutput
         let stdOutWorker =
             match onStdOutLineRecieved with
-            | Some f -> TextReaderBatcher.ProcessTextAsync (stdOut, f, name = "<stdout>") : SysTask
+            | Some f -> TextReaderBatcher.ProcessTextAsync (stdOut, f) : SysTask
             | None -> Task.CompletedTask
         use stdErr =
             match stderrAltOutput with
-            | Some stderrAltOutput -> new TeeTextReader(proc.StandardError, stderrAltOutput, leaveOutputOpen = true, name = "<stderr>") : TextReader
+            | Some stderrAltOutput -> new TeeTextReader(proc.StandardError, stderrAltOutput, leaveOutputOpen = true) : TextReader
             | None -> proc.StandardError
         let stdErrWorker =
             match onStdErrLineRecieved with
-            | Some f -> TextReaderBatcher.ProcessTextAsync (stdErr, f, name = "<stderr>") : SysTask
+            | Some f -> TextReaderBatcher.ProcessTextAsync (stdErr, f) : SysTask
             | None -> Task.CompletedTask
         
         try
@@ -97,8 +97,6 @@ type FableCompile() =
             
             use fableLogFileWriter = TextWriter.Synchronized(new StreamWriter(File.OpenWrite(this.FableLogFile), AutoFlush = true))
             
-            do! fableLogFileWriter.WriteLineAsync ("Before fable compile".AsMemory(), ?cancellationToken = cancellationToken)
-            
             try
                 let! exitCode =
                     this.RunProcessAsync (
@@ -110,15 +108,13 @@ type FableCompile() =
                         onStdErrLineRecieved = (fun msg -> Console.Error.Write(msg)),
                         stderrAltOutput = fableLogFileWriter,
                         ?cancellationToken = cancellationToken)
-                
-                do! fableLogFileWriter.WriteLineAsync ("After fable compile".AsMemory(), ?cancellationToken = cancellationToken)
             
                 if exitCode = 0 then
                     this.Log.LogMessage (MessageImportance.Normal, "Fable compilation succeeded")
                 else
                     this.Log.LogError $"Fable compilation failed (exit code %d{exitCode})"
             
-            finally    
+            finally
                 fableLogFileWriter.Flush ()
                 
         return not this.Log.HasLoggedErrors

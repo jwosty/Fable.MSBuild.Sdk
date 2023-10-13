@@ -17,10 +17,8 @@ type private BatchedTextReaderMessage =
     | End
 
 type internal TextReaderBatcher() =
-    static member ProcessTextAsync (reader: TextReader, onTextReceived: string -> unit, ?trimSingleTrailingNewline: bool, ?chunkSizeHint: int, ?maxBufferSizeHint: int, ?batchEndWait: TimeSpan, ?name: string, ?cancellationToken: CancellationToken) = task {
+    static member ProcessTextAsync (reader: TextReader, onTextReceived: string -> unit, ?trimSingleTrailingNewline: bool, ?chunkSizeHint: int, ?maxBufferSizeHint: int, ?batchEndWait: TimeSpan, ?cancellationToken: CancellationToken) = task {
         try
-            let name = defaultArg name "<unnamed>"
-            
             let batchEndWait = defaultArg batchEndWait (TimeSpan.FromSeconds 3)
             
             let trimSingleTrailingNewline = defaultArg trimSingleTrailingNewline true
@@ -42,12 +40,6 @@ type internal TextReaderBatcher() =
                 
                 let text =
                     lock sync (fun () ->
-                        sprintf
-                            "**** %s PROCESSING TEXT EVENT %s ****"
-                            name
-                            (match event with | ReceivedText chunk -> $"%s{nameof(ReceivedText)} (%d{chunk.Length})" | KeepAlive -> nameof(KeepAlive) | End -> nameof(End))
-                        |> Console.WriteLine
-                        
                         let shouldFlush =
                             match event with
                             | ReceivedText chunk ->
@@ -65,7 +57,6 @@ type internal TextReaderBatcher() =
                                 shouldFlush
                         
                         if shouldFlush then
-                            Console.WriteLine $"**** %s{name} FLUSHING FROM STRINGBUILDER (%d{sb.Length}) ****"
                             let text = sb.ToString ()
                             sb.Clear () |> ignore
                             Some text
@@ -84,13 +75,11 @@ type internal TextReaderBatcher() =
                 // TODO: while! (while-bang) from F# 8
                 let! _countRead = reader.ReadAsync buffer.Memory
                 let mutable countRead = _countRead
-                Console.WriteLine $"**** %s{name} GOT CHARS FROM TEXTREADER (%d{countRead}) ****"
                 processTextEvent (ReceivedText (buffer.Memory.Slice(0, countRead)))
                 
                 while countRead > 0 do
                     let! _countRead = reader.ReadAsync buffer.Memory
                     countRead <- _countRead
-                    Console.WriteLine $"**** %s{name} GOT CHARS FROM TEXTREADER (%d{countRead}) ****"
                     // This restarts the timer
                     timer.Change (batchEndWait, Timeout.InfiniteTimeSpan) |> ignore
                     processTextEvent (ReceivedText (buffer.Memory.Slice(0, countRead)))
@@ -98,7 +87,6 @@ type internal TextReaderBatcher() =
             
             do! readLoop ()
             processTextEvent End
-            Console.WriteLine $"**** %s{name} REACHED END OF TEXTREADER; EXITING PROCESSTEXTASYNC ****"
         with e ->
             ExceptionDispatchInfo.Throw(e)
     }
