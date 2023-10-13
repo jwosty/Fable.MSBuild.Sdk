@@ -1,5 +1,7 @@
 namespace Fable.Sdk.Tasks
 open System
+open System.Buffers
+open System.Collections.Concurrent
 open System.Diagnostics
 open System.IO
 open System.Reflection
@@ -7,6 +9,7 @@ open System.Threading
 open Microsoft.Build.Framework
 open Microsoft.Build.Utilities
 open Fable.Sdk.Tasks.Patterns
+open Microsoft.FSharp.Control
 
 type FableCompile() =
     inherit Task()
@@ -42,14 +45,13 @@ type FableCompile() =
         
         this.Log.LogMessage (MessageImportance.High, "Running process: {0} {0}", fileName, defaultArg arguments "")
         use proc = Process.Start startInfo
-        use _ =
-            match onStdOutLineRecieved with
-            | Some f -> proc.OutputDataReceived.Subscribe (fun x -> f x.Data)
-            | None -> mkDummyDisposable ()
-        use _ =
-            match onStdErrLineRecieved with
-            | Some f -> proc.ErrorDataReceived.Subscribe (fun x -> f x.Data)
-            | None -> mkDummyDisposable ()
+        onStdOutLineRecieved |> Option.iter (fun f ->
+            TextReaderBatcher.SubscribeTextReceived (proc.StandardOutput, f)
+            ()
+        )
+        onStdErrLineRecieved |> Option.iter (fun f ->
+            TextReaderBatcher.SubscribeTextReceived (proc.StandardError, f)
+        )
         
         do! proc.WaitForExitAsync (?cancellationToken = cancellationToken)
         return proc.ExitCode
@@ -63,8 +65,8 @@ type FableCompile() =
             let! exitCode =
                 this.RunProcessAsync (
                     dotnetEntry, $"%s{this.FableToolDll} %s{this.InputFsproj}",
-                    onStdOutLineRecieved = (fun msg -> this.Log.LogMessage (MessageImportance.Normal, msg)),
-                    onStdErrLineRecieved = this.Log.LogError,
+                    onStdOutLineRecieved = (fun msg -> this.Log.LogMessage (MessageImportance.High, "{0}", msg)),
+                    onStdErrLineRecieved = (fun msg -> this.Log.LogError ("{0}", msg)),
                     ?cancellationToken = cancellationToken)
             if exitCode = 0 then
                 this.Log.LogMessage (MessageImportance.Normal, "Fable compilation succeeded")
