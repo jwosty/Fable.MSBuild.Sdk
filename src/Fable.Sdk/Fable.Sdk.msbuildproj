@@ -2,7 +2,7 @@
   
   <PropertyGroup>
     <PackageId>Fable.Sdk</PackageId>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <PackageType>MSBuildSdk</PackageType>
     
     <NoWarn>NU5128</NoWarn>
@@ -20,12 +20,28 @@
     <None Include="..\..\Readme.md" Pack="true" PackagePath="\" />
   </ItemGroup>
   
+  <ItemGroup Condition="'$(PkgFable)' != ''">
+    <FableNupkgItems Include="$(PkgFable)\**\*" />
+    <FableNupkgItems Remove="$(PkgFable)\*.nupkg" />
+    <FableNupkgItems Remove="$(PkgFable)\*.nupkg.metadata" />
+    <FableNupkgItems Remove="$(PkgFable)\*.nupkg.sha512" />
+    <FableNupkgItems Remove="$(PkgFable)\signature.p7s" />
+    <None Include="@(FableNupkgItems)" Link="tools\fable\%(RecursiveDir)\%(Filename)%(Extension)" PackagePath="\" />
+  </ItemGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\Fable.Sdk.Tasks\Fable.Sdk.Tasks.fsproj" PrivateAssets="all" />
   </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="NuGetizer" Version="1.1.1" />
+    <PackageReference Include="Fable" Version="4.2.1" IncludeAssets="none" ExcludeAssets="all" PrivateAssets="none" GeneratePathProperty="true" />
   </ItemGroup>
+  
+<!--  <Target Name="CustomPackageAssets" AfterTargets="Restore">-->
+<!--    <ItemGroup>-->
+<!--      -->
+<!--    </ItemGroup>-->
+<!--  </Target>-->
   
 </Project>

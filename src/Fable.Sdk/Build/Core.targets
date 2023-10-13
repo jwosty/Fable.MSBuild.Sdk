@@ -1,7 +1,12 @@
 <Project>
     <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
+        <IntermediateFableFsproj Condition="'$(IntermediateFableFsproj)' == ''">$(BaseIntermediateOutputPath)\$(MSBuildProjectFile)</IntermediateFableFsproj>
+        <_FableToolPkgBaseDir Condition="'$(FablePkgBaseDir)' == ''">$(MSBuildThisFileDirectory)..\tools\fable\</_FableToolPkgBaseDir>
+        <FableToolDll Condition="'$(FableToolDll)' == ''">$(_FableToolPkgBaseDir)\tools\net6.0\any\fable.dll</FableToolDll>
+    </PropertyGroup>
+    
+    <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
         <AssetTargetFallback>$(AssetTargetFallback);netstandard2.1;netstandard2.0;net7.0;net6.0;net5.0</AssetTargetFallback>
-<!--        <CopyLocalRuntimeTargetAssets>true</CopyLocalRuntimeTargetAssets>-->
     </PropertyGroup>
     
     <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
@@ -10,6 +15,7 @@
         <NoStdLib Condition="'$(NoStdLib)' == ''">true</NoStdLib>
     </PropertyGroup>
     
+    
     <ItemGroup>
         <!-- Prevent the .NET SDK from trying to copy these -->
         <IntermediateAssembly Remove="@(IntermediateAssembly)" />
@@ -17,7 +23,9 @@
     
     <UsingTask TaskName="Fable.Sdk.Tasks.Greet" AssemblyFile="$(_FableSdkTasksPath)Fable.Sdk.Tasks.dll" />
     <UsingTask TaskName="Fable.Sdk.Tasks.RedirectFablePackageTargets" AssemblyFile="$(_FableSdkTasksPath)Fable.Sdk.Tasks.dll" />
-
+    <UsingTask TaskName="Fable.Sdk.Tasks.GenerateFableFsproj" AssemblyFile="$(_FableSdkTasksPath)Fable.Sdk.Tasks.dll" />
+    <UsingTask TaskName="Fable.Sdk.Tasks.FableCompile" AssemblyFile="$(_FableSdkTasksPath)Fable.Sdk.Tasks.dll" />
+    
     <Target Name="_MyCustomTarget" BeforeTargets="_CheckForUnsupportedTargetPlatformIdentifier">
         <Message Importance="high" Text="TargetFramework = $(TargetFramework)" />
         <Message Importance="high" Text="TargetFrameworkIdentifier = $(TargetFrameworkIdentifier)" />
@@ -27,7 +35,26 @@
         <Message Importance="high" Text="RuntimeIdentifier = $(RuntimeIdentifier)" />
     </Target>
     
-    <Target Name="CoreCompile">
-        <Message Importance="high" Text="THIS IS WHERE FABLE COMPILATION WOULD HAPPEN" />
+    <Target
+            Name="GenerateIntermediateFableFsproj"
+            Inputs="@(CompileBefore);@(Compile);@(CompileAfter)"
+            Outputs="$(IntermediateFableFsproj)">
+        <GenerateFableFsproj
+            Sources="@(CompileBefore);@(Compile);@(CompileAfter)"
+            OutputFsproj="$(IntermediateFableFsproj)"
+        />
+    </Target>
+    
+    <PropertyGroup>
+        <CoreCompileDependsOn>$(CoreCompileDependsOn);GenerateIntermediateFableFsproj</CoreCompileDependsOn>
+    </PropertyGroup>
+    
+    <Target Name="CoreCompile" DependsOnTargets="$(CoreCompileDependsOn)">
+        <Message Importance="high" Text="Starting Fable compilation..." />
+        <FableCompile
+                InputFsproj="$(IntermediateFableFsproj)"
+                FableToolDll="$(FableToolDll)" >
+            <Output TaskParameter="OutputFiles" PropertyName="FableOutputFiles" />
+        </FableCompile>
     </Target>
 </Project>
