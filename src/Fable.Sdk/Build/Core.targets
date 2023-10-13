@@ -3,6 +3,7 @@
         <IntermediateFableFsproj Condition="'$(IntermediateFableFsproj)' == ''">$(BaseIntermediateOutputPath)\$(MSBuildProjectFile)</IntermediateFableFsproj>
         <_FableToolPkgBaseDir Condition="'$(FablePkgBaseDir)' == ''">$(MSBuildThisFileDirectory)..\tools\fable\</_FableToolPkgBaseDir>
         <FableToolDll Condition="'$(FableToolDll)' == ''">$(_FableToolPkgBaseDir)\tools\net6.0\any\fable.dll</FableToolDll>
+        <FableCompilerLogFile Condition="'$(EnableFableCompilerLogFile)' == 'true'">$(BaseIntermediateOutputPath)\fable-log.txt</FableCompilerLogFile>
     </PropertyGroup>
     
     <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
@@ -53,7 +54,8 @@
         <Message Importance="high" Text="Starting Fable compilation..." />
         <FableCompile
                 InputFsproj="$(IntermediateFableFsproj)"
-                FableToolDll="$(FableToolDll)" >
+                FableToolDll="$(FableToolDll)"
+                CompilerLogFile="$(FableCompilerLogFile)" >
             <Output TaskParameter="OutputFiles" PropertyName="FableOutputFiles" />
         </FableCompile>
     </Target>

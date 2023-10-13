@@ -32,12 +32,7 @@ type FableCompile() =
     [<Output>]
     member val OutputFiles: ITaskItem[] = Array.empty with get
     
-    // member val FableLogFile: string = null with get, set
-    member this.FableLogFile
-        with get () =
-            match _FableLogFile with
-            | Some x -> x
-            | None -> Path.Combine(FileInfo(this.InputFsproj).Directory.FullName, "fable-log.txt")
+    member val CompilerLogFile: string = null with get, set
     
     member private this.StartProcess (startInfo: ProcessStartInfo) =
         this.Log.LogMessage (MessageImportance.High, "Running: {0}", startInfo.FileName, startInfo.Arguments)
@@ -95,18 +90,22 @@ type FableCompile() =
         else
             let dotnetEntry = Process.GetCurrentProcess().MainModule.FileName
             
-            use fableLogFileWriter = TextWriter.Synchronized(new StreamWriter(File.OpenWrite(this.FableLogFile), AutoFlush = true))
+            let mutable compilerLogFileWriter = None
             
             try
+                compilerLogFileWriter <-
+                    match this.CompilerLogFile with
+                    | null | "" -> None
+                    | compilerLogFile ->
+                        Some (TextWriter.Synchronized (new StreamWriter(File.OpenWrite compilerLogFile, AutoFlush = true)))
+                
                 let! exitCode =
                     this.RunProcessAsync (
                         dotnetEntry, $"%s{this.FableToolDll} %s{this.InputFsproj}",
-                        // onStdOutLineRecieved = (fun msg -> this.Log.LogMessage (MessageImportance.High, "{0}", msg)),
-                        onStdOutLineRecieved = (fun msg -> Console.Write(msg)),
-                        stdoutAltOutput = fableLogFileWriter,
-                        // onStdErrLineRecieved = (fun msg -> this.Log.LogError ("{0}", msg)),
-                        onStdErrLineRecieved = (fun msg -> Console.Error.Write(msg)),
-                        stderrAltOutput = fableLogFileWriter,
+                        onStdOutLineRecieved = (fun msg -> this.Log.LogMessage (MessageImportance.High, "{0}", msg)),
+                        ?stdoutAltOutput = compilerLogFileWriter,
+                        onStdErrLineRecieved = (fun msg -> this.Log.LogError ("{0}", msg)),
+                        ?stderrAltOutput = compilerLogFileWriter,
                         ?cancellationToken = cancellationToken)
             
                 if exitCode = 0 then
@@ -115,7 +114,11 @@ type FableCompile() =
                     this.Log.LogError $"Fable compilation failed (exit code %d{exitCode})"
             
             finally
-                fableLogFileWriter.Flush ()
+                match compilerLogFileWriter with
+                | Some compilerLogFileWriter ->
+                    compilerLogFileWriter.Flush ()
+                    compilerLogFileWriter.Dispose ()
+                | None -> ()
                 
         return not this.Log.HasLoggedErrors
     }
