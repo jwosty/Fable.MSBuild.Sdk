@@ -7,6 +7,12 @@
       "commands": [
         "nugetize"
       ]
+    },
+    "fable": {
+      "version": "4.2.1",
+      "commands": [
+        "fable"
+      ]
     }
   }
 }

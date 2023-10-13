@@ -8,6 +8,16 @@
   </PropertyGroup>
   
   <ItemGroup>
+    <Compile Include="TeeTextReader.fs">
+      <CodeLanguage>fs</CodeLanguage>
+      <DefaultPackFolder>content</DefaultPackFolder>
+      <BuildAction>Compile</BuildAction>
+    </Compile>
+    <Compile Include="TextReaderBatcher.fs">
+      <CodeLanguage>fs</CodeLanguage>
+      <DefaultPackFolder>content</DefaultPackFolder>
+      <BuildAction>Compile</BuildAction>
+    </Compile>
     <Compile Include="ActivePatterns.fs">
       <CodeLanguage>fs</CodeLanguage>
       <DefaultPackFolder>content</DefaultPackFolder>
@@ -19,11 +29,6 @@
       <BuildAction>Compile</BuildAction>
     </Compile>
     <Compile Include="GenerateFableFsproj.fs">
-      <CodeLanguage>fs</CodeLanguage>
-      <DefaultPackFolder>content</DefaultPackFolder>
-      <BuildAction>Compile</BuildAction>
-    </Compile>
-    <Compile Include="TextReaderBatcher.fs">
       <CodeLanguage>fs</CodeLanguage>
       <DefaultPackFolder>content</DefaultPackFolder>
       <BuildAction>Compile</BuildAction>

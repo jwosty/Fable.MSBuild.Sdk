@@ -15,6 +15,7 @@ type FableCompile() =
     inherit Task()
     
     let mutable cts = None
+    let mutable _FableLogFile = None
     
     [<Required>]
     member val InputFsproj: string = "" with get, set
@@ -25,28 +26,43 @@ type FableCompile() =
     [<Output>]
     member val OutputFiles: ITaskItem[] = Array.empty with get
     
+    // member val FableLogFile: string = null with get, set
+    member this.FableLogFile
+        with get () =
+            match _FableLogFile with
+            | Some x -> x
+            | None -> Path.Combine(FileInfo(this.InputFsproj).Directory.FullName, "fable-log.txt")
+    
     member private this.StartProcess (startInfo: ProcessStartInfo) =
         this.Log.LogMessage (MessageImportance.High, "Running: {0}", startInfo.FileName, startInfo.Arguments)
         Process.Start startInfo
     
-    member private this.RunProcessAsync (fileName: string, ?arguments: string, ?useShellExecute: bool, ?onStdOutLineRecieved: string -> unit, ?onStdErrLineRecieved: string -> unit, ?cancellationToken: CancellationToken) = task {
+    member private this.RunProcessAsync (fileName: string, ?arguments: string, ?useShellExecute: bool, ?onStdOutLineRecieved: string -> unit, ?stdoutAltOutput: TextWriter, ?onStdErrLineRecieved: string -> unit, ?stderrAltOutput: TextWriter, ?cancellationToken: CancellationToken) = task {
         let startInfo = ProcessStartInfo(FileName = fileName)
         arguments |> Option.iter (fun arguments -> startInfo.Arguments <- arguments)
         useShellExecute |> Option.iter (fun useShellExecute -> startInfo.UseShellExecute <- useShellExecute)
-        startInfo.RedirectStandardOutput <- Option.isSome onStdOutLineRecieved
-        startInfo.RedirectStandardError <- Option.isSome onStdErrLineRecieved
+        startInfo.RedirectStandardOutput <- Option.isSome onStdOutLineRecieved || Option.isSome stdoutAltOutput
+        startInfo.RedirectStandardError <- Option.isSome onStdErrLineRecieved || Option.isSome stderrAltOutput
         
         this.Log.LogMessage (MessageImportance.High, "Running process: {0} {0}", fileName, defaultArg arguments "")
         use proc = Process.Start startInfo
+        use _ =
+            match stdoutAltOutput with
+            | Some stdoutAltOutput -> new TeeTextReader(proc.StandardOutput, stdoutAltOutput, leaveOutputOpen = true) : TextReader
+            | None -> proc.StandardOutput
         onStdOutLineRecieved |> Option.iter (fun f ->
             TextReaderBatcher.SubscribeTextReceived (proc.StandardOutput, f)
-            ()
         )
+        use _ =
+            match stderrAltOutput with
+            | Some stderrAltOutput -> new TeeTextReader(proc.StandardError, stderrAltOutput, leaveOutputOpen = true) : TextReader
+            | None -> proc.StandardOutput
         onStdErrLineRecieved |> Option.iter (fun f ->
             TextReaderBatcher.SubscribeTextReceived (proc.StandardError, f)
         )
         
         do! proc.WaitForExitAsync (?cancellationToken = cancellationToken)
+        
         return proc.ExitCode
     }
     
@@ -55,16 +71,22 @@ type FableCompile() =
             this.Log.LogError ("Fable tool not found at {0}", this.FableToolDll)
         else
             let dotnetEntry = Process.GetCurrentProcess().MainModule.FileName
+            
+            use fableLogFileWriter = TextWriter.Synchronized(new StreamWriter(File.OpenWrite(this.FableLogFile)))
+            
             let! exitCode =
                 this.RunProcessAsync (
                     dotnetEntry, $"%s{this.FableToolDll} %s{this.InputFsproj}",
                     onStdOutLineRecieved = (fun msg -> this.Log.LogMessage (MessageImportance.High, "{0}", msg)),
+                    stdoutAltOutput = TextWriter.Synchronized fableLogFileWriter,
                     onStdErrLineRecieved = (fun msg -> this.Log.LogError ("{0}", msg)),
                     ?cancellationToken = cancellationToken)
+            
             if exitCode = 0 then
                 this.Log.LogMessage (MessageImportance.Normal, "Fable compilation succeeded")
             else
                 this.Log.LogError $"Fable compilation failed (exit code %d{exitCode})"
+                
         return not this.Log.HasLoggedErrors
     }
     

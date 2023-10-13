@@ -26,14 +26,14 @@
     <UsingTask TaskName="Fable.Sdk.Tasks.GenerateFableFsproj" AssemblyFile="$(_FableSdkTasksPath)Fable.Sdk.Tasks.dll" />
     <UsingTask TaskName="Fable.Sdk.Tasks.FableCompile" AssemblyFile="$(_FableSdkTasksPath)Fable.Sdk.Tasks.dll" />
     
-    <Target Name="_MyCustomTarget" BeforeTargets="_CheckForUnsupportedTargetPlatformIdentifier">
-        <Message Importance="high" Text="TargetFramework = $(TargetFramework)" />
-        <Message Importance="high" Text="TargetFrameworkIdentifier = $(TargetFrameworkIdentifier)" />
-        <Message Importance="high" Text="TargetFrameworkVersion = $(TargetFrameworkVersion)" />
-        <Message Importance="high" Text="TargetPlatformIdentifier = $(TargetPlatformIdentifier)" />
-        <Message Importance="high" Text="TargetPlatformVersion = $(TargetPlatformVersion)" />
-        <Message Importance="high" Text="RuntimeIdentifier = $(RuntimeIdentifier)" />
-    </Target>
+<!--    <Target Name="_MyCustomTarget" BeforeTargets="_CheckForUnsupportedTargetPlatformIdentifier">-->
+<!--        <Message Importance="high" Text="TargetFramework = $(TargetFramework)" />-->
+<!--        <Message Importance="high" Text="TargetFrameworkIdentifier = $(TargetFrameworkIdentifier)" />-->
+<!--        <Message Importance="high" Text="TargetFrameworkVersion = $(TargetFrameworkVersion)" />-->
+<!--        <Message Importance="high" Text="TargetPlatformIdentifier = $(TargetPlatformIdentifier)" />-->
+<!--        <Message Importance="high" Text="TargetPlatformVersion = $(TargetPlatformVersion)" />-->
+<!--        <Message Importance="high" Text="RuntimeIdentifier = $(RuntimeIdentifier)" />-->
+<!--    </Target>-->
     
     <Target
             Name="GenerateIntermediateFableFsproj"

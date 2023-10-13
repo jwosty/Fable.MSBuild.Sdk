@@ -18,6 +18,7 @@ type internal TextReaderBatcher() =
     static member ProcessTextAsync (reader: TextReader, onTextReceived: string -> unit, ?trimSingleTrailingNewline: bool, ?chunkSizeHint: int, ?maxBufferSizeHint: int, ?batchEndWait: TimeSpan, ?cancellationToken: CancellationToken) = task {
         let batchEndWait = defaultArg batchEndWait (TimeSpan.FromSeconds 3)
         
+        let trimSingleTrailingNewline = defaultArg trimSingleTrailingNewline true
         let chunkSizeHint = defaultArg chunkSizeHint 4096
         let maxBufferSizeHint = defaultArg maxBufferSizeHint (chunkSizeHint * 16)
         
@@ -25,14 +26,14 @@ type internal TextReaderBatcher() =
         let sb = StringBuilder(maxBufferSizeHint)
         
         let processTextEvent (event: BatchedTextReaderMessage) =
-            let getStr (sb: StringBuilder) =
+            // Trims a *single* trailing newline, if it exists
+            let trimTrailingNewline (sb: StringBuilder) =
                 let z = if sb.Length > 0 then Some (sb[sb.Length - 1]) else None
                 let y = if sb.Length > 1 then Some (sb[sb.Length - 2]) else None
                 match y, z with
                 | Some '\r', Some '\n'          -> sb.Length <- sb.Length - 2
                 | _,         Some ('\r' | '\n') -> sb.Length <- sb.Length - 1
                 | _,         _                  -> ()
-                ()
             
             let text =
                 lock sync (fun () ->
@@ -45,9 +46,13 @@ type internal TextReaderBatcher() =
                     
                     let shouldFlush = shouldFlush && sb.Length > 0
                     if shouldFlush then
-                        let text = sb.ToString()
-                        sb.Clear () |> ignore
-                        Some text
+                        if trimSingleTrailingNewline then trimTrailingNewline sb
+                        let text = sb.ToString ()
+                        if not (String.IsNullOrEmpty text) then
+                            sb.Clear () |> ignore
+                            Some text
+                        else
+                            None
                     else
                         None
                 )
