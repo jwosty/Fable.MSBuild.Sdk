@@ -46,22 +46,24 @@ type FableCompile() =
         
         this.Log.LogMessage (MessageImportance.High, "Running process: {0} {0}", fileName, defaultArg arguments "")
         use proc = Process.Start startInfo
-        use _ =
+        use stdOut =
             match stdoutAltOutput with
             | Some stdoutAltOutput -> new TeeTextReader(proc.StandardOutput, stdoutAltOutput, leaveOutputOpen = true) : TextReader
             | None -> proc.StandardOutput
         onStdOutLineRecieved |> Option.iter (fun f ->
-            TextReaderBatcher.SubscribeTextReceived (proc.StandardOutput, f)
+            TextReaderBatcher.SubscribeTextReceived (stdOut, f)
         )
-        use _ =
+        use stdErr =
             match stderrAltOutput with
             | Some stderrAltOutput -> new TeeTextReader(proc.StandardError, stderrAltOutput, leaveOutputOpen = true) : TextReader
             | None -> proc.StandardOutput
         onStdErrLineRecieved |> Option.iter (fun f ->
-            TextReaderBatcher.SubscribeTextReceived (proc.StandardError, f)
+            TextReaderBatcher.SubscribeTextReceived (stdErr, f)
         )
         
         do! proc.WaitForExitAsync (?cancellationToken = cancellationToken)
+        
+        do! Async.Sleep 5000
         
         return proc.ExitCode
     }
@@ -74,6 +76,8 @@ type FableCompile() =
             
             use fableLogFileWriter = TextWriter.Synchronized(new StreamWriter(File.OpenWrite(this.FableLogFile)))
             
+            do! fableLogFileWriter.WriteLineAsync ("Before fable compile".AsMemory(), ?cancellationToken = cancellationToken)
+            
             let! exitCode =
                 this.RunProcessAsync (
                     dotnetEntry, $"%s{this.FableToolDll} %s{this.InputFsproj}",
@@ -81,6 +85,10 @@ type FableCompile() =
                     stdoutAltOutput = TextWriter.Synchronized fableLogFileWriter,
                     onStdErrLineRecieved = (fun msg -> this.Log.LogError ("{0}", msg)),
                     ?cancellationToken = cancellationToken)
+            
+            do! fableLogFileWriter.WriteLineAsync ("After fable compile".AsMemory(), ?cancellationToken = cancellationToken)
+            
+            do! fableLogFileWriter.FlushAsync ()
             
             if exitCode = 0 then
                 this.Log.LogMessage (MessageImportance.Normal, "Fable compilation succeeded")

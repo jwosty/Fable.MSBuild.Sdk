@@ -28,14 +28,14 @@ type TeeTextReader(input: TextReader, output: TextWriter, ?leaveInputOpen: bool,
     
     override this.Close () =
         ensureBoth
-            (fun () -> if leaveInputOpen then input.Close ())
-            (fun () -> if leaveInputOpen then output.Close ())
+            (fun () -> if not leaveInputOpen then input.Close ())
+            (fun () -> if not leaveInputOpen then output.Close ())
         
     override this.Dispose disposing =
         if disposing then
             ensureBoth
-                (fun () -> if leaveInputOpen then (input : IDisposable).Dispose ())
-                (fun () -> if leaveOutputOpen then (output : IDisposable).Dispose ())
+                (fun () -> if not leaveInputOpen then (input : IDisposable).Dispose ())
+                (fun () -> if not leaveOutputOpen then (output : IDisposable).Dispose ())
     
     override this.Peek () = input.Peek ()
     
