@@ -1,9 +1,12 @@
-<Project Sdk="Microsoft.Build.NoTargets">
+<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
     <PackageId>Fable.Sdk</PackageId>
     <TargetFramework>net6.0</TargetFramework>
     <PackageType>MSBuildSdk</PackageType>
+    
+    <AssemblyName>Fable.Sdk.Tasks</AssemblyName>
+    <PackFolder>build</PackFolder>
     
     <NoWarn>NU5128</NoWarn>
     <!-- Suppress generation of an unneeded <dependencies> element (it has a targetFramework which doesn't make sense in a content-only package) -->
@@ -11,12 +14,21 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <None Include="Build\Core.props" PackagePath="Build\" />
-    <None Include="Build\Core.targets" PackagePath="Build\" />
-    <None Include="Build\TFMs.targets" PackagePath="Build\" />
-    <None Include="Build\Overrides.targets" PackagePath="Build\" />
-    <None Include="Sdk\Sdk.props" PackagePath="Sdk\" />
-    <None Include="Sdk\Sdk.targets" PackagePath="Sdk\" />
+    <Compile Include="TeeTextReader.fs" />
+    <Compile Include="TextReaderBatcher.fs" />
+    <Compile Include="ActivePatterns.fs" />
+    <Compile Include="RedirectFablePackageTargets.fs" />
+    <Compile Include="GenerateFableFsproj.fs" />
+    <Compile Include="FableCompile.fs" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="build\Core.props" PackagePath="build\" />
+    <None Include="build\Core.targets" PackagePath="build\" />
+    <None Include="build\TFMs.targets" PackagePath="build\" />
+    <None Include="build\Overrides.targets" PackagePath="build\" />
+    <None Include="Sdk\Sdk.props" PackagePath="sdk\" />
+    <None Include="Sdk\Sdk.targets" PackagePath="sdk\" />
     <None Include="..\..\Readme.md" Pack="true" PackagePath="\" />
   </ItemGroup>
   
@@ -30,13 +42,13 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\Fable.Sdk.Tasks\Fable.Sdk.Tasks.fsproj" PrivateAssets="all" />
+    <PackageReference Include="NuGetizer" Version="1.1.1" />
+    <PackageReference Update="FSharp.Core" Version="7.0.400" PrivateAssets="all" />
+    <PackageReference Include="Fable" Version="4.2.1" IncludeAssets="none" ExcludeAssets="all" PrivateAssets="none" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.7.2" PrivateAssets="all" />
   </ItemGroup>
   
-  <ItemGroup>
-    <PackageReference Include="NuGetizer" Version="1.1.1" />
-    <PackageReference Include="Fable" Version="4.2.1" IncludeAssets="none" ExcludeAssets="all" PrivateAssets="none" GeneratePathProperty="true" />
-  </ItemGroup>
+  <Target Name="_GetFrameworkAssemblyReferences" />
   
 <!--  <Target Name="CustomPackageAssets" AfterTargets="Restore">-->
 <!--    <ItemGroup>-->

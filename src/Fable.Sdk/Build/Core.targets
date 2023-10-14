@@ -22,10 +22,9 @@
         <IntermediateAssembly Remove="@(IntermediateAssembly)" />
     </ItemGroup>
     
-    <UsingTask TaskName="Fable.Sdk.Tasks.Greet" AssemblyFile="$(_FableSdkTasksPath)Fable.Sdk.Tasks.dll" />
-    <UsingTask TaskName="Fable.Sdk.Tasks.RedirectFablePackageTargets" AssemblyFile="$(_FableSdkTasksPath)Fable.Sdk.Tasks.dll" />
-    <UsingTask TaskName="Fable.Sdk.Tasks.GenerateFableFsproj" AssemblyFile="$(_FableSdkTasksPath)Fable.Sdk.Tasks.dll" />
-    <UsingTask TaskName="Fable.Sdk.Tasks.FableCompile" AssemblyFile="$(_FableSdkTasksPath)Fable.Sdk.Tasks.dll" />
+    <UsingTask TaskName="Fable.Sdk.Tasks.RedirectFablePackageTargets" AssemblyFile="$(_FableSdkTasksPath)" />
+    <UsingTask TaskName="Fable.Sdk.Tasks.GenerateFableFsproj" AssemblyFile="$(_FableSdkTasksPath)" />
+    <UsingTask TaskName="Fable.Sdk.Tasks.FableCompile" AssemblyFile="$(_FableSdkTasksPath)" />
     
 <!--    <Target Name="_MyCustomTarget" BeforeTargets="_CheckForUnsupportedTargetPlatformIdentifier">-->
 <!--        <Message Importance="high" Text="TargetFramework = $(TargetFramework)" />-->
