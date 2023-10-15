@@ -16,6 +16,9 @@
         <NoStdLib Condition="'$(NoStdLib)' == ''">true</NoStdLib>
     </PropertyGroup>
     
+<!--    <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">-->
+<!--        -->
+<!--    </ItemGroup>-->
     
     <ItemGroup>
         <!-- Prevent the .NET SDK from trying to copy these -->
@@ -42,6 +45,7 @@
         <GenerateFableFsproj
             Sources="@(CompileBefore);@(Compile);@(CompileAfter)"
             PackageReferences="@(PackageReference)"
+            ProjectReferences="@(ProjectReference)"
             OutputFsproj="$(IntermediateFableFsproj)"
         />
     </Target>
