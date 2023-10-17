@@ -2,10 +2,12 @@ namespace Fable.Sdk.Tasks
 open System
 open System.Buffers
 open System.Collections.Concurrent
+open System.Collections.Generic
 open System.Diagnostics
 open System.IO
 open System.Reflection
 open System.Runtime.ExceptionServices
+open System.Text
 open System.Threading
 open System.Threading.Tasks
 open Microsoft.Build.Framework
@@ -34,18 +36,34 @@ type FableCompile() =
     
     member val CompilerLogFile: string = null with get, set
     
+    member val Run: string = null with get, set
+    
+    member val RunFast: string = null with get, set
+    
+    member val RunWatch: string = null with get, set
+    
+    member val OtherFlags: string = null with get, set
+    
     member private this.StartProcess (startInfo: ProcessStartInfo) =
         this.Log.LogMessage (MessageImportance.High, "Running: {0}", startInfo.FileName, startInfo.Arguments)
         Process.Start startInfo
     
-    member private this.RunProcessAsync (fileName: string, ?arguments: string, ?useShellExecute: bool, ?onStdOutLineRecieved: string -> unit, ?stdoutAltOutput: TextWriter, ?onStdErrLineRecieved: string -> unit, ?stderrAltOutput: TextWriter, ?cancellationToken: CancellationToken) = task {
+    member private this.RunProcessAsync (fileName: string, ?arguments: Choice<string,seq<string>>, ?useShellExecute: bool, ?onStdOutLineRecieved: string -> unit, ?stdoutAltOutput: TextWriter, ?onStdErrLineRecieved: string -> unit, ?stderrAltOutput: TextWriter, ?cancellationToken: CancellationToken) = task {
         let startInfo = ProcessStartInfo(FileName = fileName)
-        arguments |> Option.iter (fun arguments -> startInfo.Arguments <- arguments)
+        let argsStr =
+            match arguments with
+            | Some (Choice1Of2 args) ->
+                startInfo.Arguments <- args
+                args
+            | Some (Choice2Of2 args) ->
+                args |> Seq.iter startInfo.ArgumentList.Add
+                String.Join (' ', args)
+            | None -> ""
         useShellExecute |> Option.iter (fun useShellExecute -> startInfo.UseShellExecute <- useShellExecute)
         startInfo.RedirectStandardOutput <- Option.isSome onStdOutLineRecieved || Option.isSome stdoutAltOutput
         startInfo.RedirectStandardError <- Option.isSome onStdErrLineRecieved || Option.isSome stderrAltOutput
         
-        this.Log.LogMessage (MessageImportance.High, "Running process: {0} {1}", fileName, defaultArg arguments "")
+        this.Log.LogMessage (MessageImportance.High, "Running process: {0} {1}", fileName, argsStr)
         use proc = Process.Start startInfo
         use stdOut =
             match stdoutAltOutput with
@@ -99,9 +117,33 @@ type FableCompile() =
                     | compilerLogFile ->
                         Some (TextWriter.Synchronized (new StreamWriter(File.OpenWrite compilerLogFile, AutoFlush = true)))
                 
+                // let args =
+                //     let sb = StringBuilder()
+                //     sb.Append(this.FableToolDll).Append(' ').Append(this.InputFsproj) |> ignore
+                //     if not (String.IsNullOrWhiteSpace this.OtherFlags) then
+                //         sb.Append(' ').Append(this.OtherFlags) |> ignore
+                //     sb.ToString ()
+                
+                let args =
+                    [
+                        this.FableToolDll
+                        this.InputFsproj
+                        if not (String.IsNullOrWhiteSpace this.OtherFlags) then this.OtherFlags
+                        if not (String.IsNullOrWhiteSpace this.Run) then
+                            "--run"
+                            this.Run
+                        if not (String.IsNullOrWhiteSpace this.RunFast) then
+                            "--runFast"
+                            this.RunFast
+                        if not (String.IsNullOrWhiteSpace this.RunWatch) then
+                            "--runWatch"
+                            this.RunWatch
+                    ]
+                    |> String.concat " "
+                
                 let! exitCode =
                     this.RunProcessAsync (
-                        dotnetEntry, $"%s{this.FableToolDll} %s{this.InputFsproj}",
+                        dotnetEntry, Choice1Of2 args,
                         onStdOutLineRecieved = (fun msg -> this.Log.LogMessage (MessageImportance.High, "{0}", msg)),
                         ?stdoutAltOutput = compilerLogFileWriter,
                         onStdErrLineRecieved = (fun msg -> this.Log.LogError ("{0}", msg)),

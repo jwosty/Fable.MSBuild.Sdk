@@ -4,9 +4,15 @@
 <!--    <TargetFrameworks>netstandard2.0;fable4</TargetFrameworks>-->
     <TargetFramework>fable4.0</TargetFramework>
     <NoWarn>NU1701</NoWarn>
+    <FableRestoreCommand>yarn install</FableRestoreCommand>
+    <FableBundleCommand>webpack</FableBundleCommand>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="App.fs" />
+    <Content Include="webpack.config.js" />
+    <Content Include="public\fable.ico" />
+    <Content Include="public\bundle.js" />
+    <Content Include="public\index.html" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Fable.Browser.Dom" Version="2.2.0" />

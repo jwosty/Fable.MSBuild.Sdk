@@ -5,7 +5,6 @@
     </PropertyGroup>
     
     <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
-        
         <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">js</RuntimeIdentifier>
         <TargetPlatformIdentifier Condition="'$(RuntimeIdentifier)' == 'js'">js</TargetPlatformIdentifier>
     </PropertyGroup>

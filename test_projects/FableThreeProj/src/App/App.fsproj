@@ -2,9 +2,14 @@
   <PropertyGroup>
     <TargetFramework>fable4.0</TargetFramework>
     <NoWarn>NU1701</NoWarn>
+    <FableRestoreCommand>yarn install</FableRestoreCommand>
+    <FableBundleCommand>webpack</FableBundleCommand>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="App.fs" />
+    <Content Include="webpack.config.js" />
+    <Content Include="public\fable.ico" />
+    <Content Include="public\index.html" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\App.Friend\App.Friend.fsproj" />

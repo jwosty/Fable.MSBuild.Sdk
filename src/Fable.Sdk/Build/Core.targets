@@ -16,9 +16,10 @@
         <NoStdLib Condition="'$(NoStdLib)' == ''">true</NoStdLib>
     </PropertyGroup>
     
-<!--    <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">-->
-<!--        -->
-<!--    </ItemGroup>-->
+    <PropertyGroup Condition="'$(FableBundleCommand)' != ''">
+        <FableRun Condition="'$(FableBundleCommand.ToLowerInvariant())' == 'webpack'">webpack</FableRun>
+    </PropertyGroup>
+    
     
     <ItemGroup>
         <!-- Prevent the .NET SDK from trying to copy these -->
@@ -37,6 +38,10 @@
 <!--        <Message Importance="high" Text="TargetPlatformVersion = $(TargetPlatformVersion)" />-->
 <!--        <Message Importance="high" Text="RuntimeIdentifier = $(RuntimeIdentifier)" />-->
 <!--    </Target>-->
+    
+    <Target Name="FableRestore" AfterTargets="Restore" Condition="'$(FableRestoreCommand)' != ''">
+        <Exec Command="$(FableRestoreCommand)" />
+    </Target>
     
     <Target
             Name="GenerateIntermediateFableFsproj"
@@ -59,7 +64,11 @@
         <FableCompile
                 InputFsproj="$(IntermediateFableFsproj)"
                 FableToolDll="$(FableToolDll)"
-                CompilerLogFile="$(FableCompilerLogFile)" >
+                Run="$(FableRun)"
+                RunFast="$(FableRunFast)"
+                RunWatch="$(FableRunWatch)"
+                CompilerLogFile="$(FableCompilerLogFile)"
+                OtherFlags="$(OtherFlags)" >
             <Output TaskParameter="OutputFiles" PropertyName="FableOutputFiles" />
         </FableCompile>
     </Target>

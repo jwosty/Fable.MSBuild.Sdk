@@ -65,14 +65,7 @@ type GenerateFableFsproj() =
         let projectReferences =
             this.ProjectReferences
             |> Array.map (fun projRef ->
-                // this.Log.LogMessage (MessageImportance.High, sprintf $"projRef.ItemSpec: %s{projRef.ItemSpec}")
-                // let originalPath = FileInfo(projRef.ItemSpec)
-                // this.Log.LogMessage (MessageImportance.High, sprintf $"originalPath: %O{originalPath}")
-                // let newPath = "..\\" + originalPath.Directory.FullName + "\\obj\\" + originalPath.Name
-                this.Log.LogMessage (MessageImportance.High, $"Environment.CurrentDirectory: %s{Environment.CurrentDirectory}")
                 let originalPath = projRef.ItemSpec
-                // Since it's MSBuild convention to use Windows-style path separators in project files, it's okay that
-                // we use concatenation (THE HORROR) instead of using Path.Combine
                 let newPath =
                     if Path.IsPathFullyQualified originalPath then
                         //    C:\Code\App\src\Dependency\Dependency.fsproj
@@ -82,7 +75,7 @@ type GenerateFableFsproj() =
                         //       ..\Dependency\Dependency.fsproj
                         // -> ..\..\Dependency\obj\Dependency.fsproj
                         Path.Combine ("..", Path.GetDirectoryName originalPath, "obj", Path.GetFileName originalPath)
-                this.Log.LogMessage (MessageImportance.High, $"Fixing up ProjectReference: %s{originalPath} -> %s{newPath}")
+                this.Log.LogMessage (MessageImportance.Normal, $"Fixing up ProjectReference: %s{originalPath} -> %s{newPath}")
                 let customMetadata = getCustomMetadataDict projRef
                 let attrs =
                     customMetadata
