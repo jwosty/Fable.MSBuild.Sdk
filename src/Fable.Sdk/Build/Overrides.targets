@@ -27,6 +27,5 @@
     <Target Name="GetTargetPathWithTargetPlatformMoniker"
             BeforeTargets="GetTargetPath"
             DependsOnTargets="$(GetTargetPathWithTargetPlatformMonikerDependsOn)"
-            Returns="@(TargetPathWithTargetPlatformMoniker)">
-    </Target>
+            Returns="@(TargetPathWithTargetPlatformMoniker)" />
 </Project>

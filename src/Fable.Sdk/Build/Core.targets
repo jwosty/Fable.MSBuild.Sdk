@@ -8,18 +8,22 @@
     
     <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
         <AssetTargetFallback>$(AssetTargetFallback);netstandard2.1;netstandard2.0;net7.0;net6.0;net5.0</AssetTargetFallback>
-    </PropertyGroup>
-    
-    <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
         <_EnableDefaultWindowsPlatform>false</_EnableDefaultWindowsPlatform>
         <!-- Prevent the .NET SDK from attempting to include mscorlib.dll -->
         <NoStdLib Condition="'$(NoStdLib)' == ''">true</NoStdLib>
     </PropertyGroup>
     
-    <PropertyGroup Condition="'$(FableBundleCommand)' != ''">
-        <FableRun Condition="'$(FableBundleCommand.ToLowerInvariant())' == 'webpack'">webpack</FableRun>
+    <PropertyGroup>
+        <TargetLanguage Condition="'$(TargetLanguage)' == ''">$(RuntimeIdentifier)</TargetLanguage>
     </PropertyGroup>
     
+    <Target Name="_CheckTargetLanguage" BeforeTargets="Restore">
+        <Error Condition="'$(TargetLanguage)' == ''" Text="Missing TargetLanguage property!" />
+    </Target>
+    
+    <PropertyGroup Condition="'$(FableBundleCommand)' != ''">
+        <FableRun Condition="'$(FableRun)' == '' and '$(FableBundleCommand.ToLowerInvariant())' != ''">$(FableBundleCommand)</FableRun>
+    </PropertyGroup>
     
     <ItemGroup>
         <!-- Prevent the .NET SDK from trying to copy these -->
@@ -61,9 +65,14 @@
     
     <Target Name="CoreCompile" DependsOnTargets="$(CoreCompileDependsOn)">
         <Message Importance="high" Text="Starting Fable compilation..." />
+        <!-- Append tmp to OutDir because the fsproj which Fable is compiling is one directory down (./obj/App.fsproj), and
+             takes those relative links into account (<Compile Include="../SomeFile.fs" />) when resolving output paths -->
         <FableCompile
                 InputFsproj="$(IntermediateFableFsproj)"
                 FableToolDll="$(FableToolDll)"
+                Language="$(TargetLanguage)"
+                NoRestore="$(FableNoRestore)"
+                OutDir="$(MSBuildProjectDirectory)\$(OutDir)\tmp"
                 Run="$(FableRun)"
                 RunFast="$(FableRunFast)"
                 RunWatch="$(FableRunWatch)"

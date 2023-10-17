@@ -31,10 +31,14 @@ type FableCompile() =
     [<Required>]
     member val FableToolDll = "" with get, set
     
-    [<Output>]
-    member val OutputFiles: ITaskItem[] = Array.empty with get
+    [<Required>]
+    member val Language: string = "" with get, set
+    
+    member val OutDir = "" with get, set
     
     member val CompilerLogFile: string = null with get, set
+    
+    member val NoRestore: bool = false with get, set
     
     member val Run: string = null with get, set
     
@@ -43,6 +47,9 @@ type FableCompile() =
     member val RunWatch: string = null with get, set
     
     member val OtherFlags: string = null with get, set
+    
+    [<Output>]
+    member val OutputFiles: ITaskItem[] = Array.empty with get
     
     member private this.StartProcess (startInfo: ProcessStartInfo) =
         this.Log.LogMessage (MessageImportance.High, "Running: {0}", startInfo.FileName, startInfo.Arguments)
@@ -128,6 +135,10 @@ type FableCompile() =
                     [
                         this.FableToolDll
                         this.InputFsproj
+                        if not (String.IsNullOrEmpty this.OutDir) then
+                            "--outDir"
+                            this.OutDir
+                        if this.NoRestore then "--noRestore"
                         if not (String.IsNullOrWhiteSpace this.OtherFlags) then this.OtherFlags
                         if not (String.IsNullOrWhiteSpace this.Run) then
                             "--run"

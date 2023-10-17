@@ -5,8 +5,8 @@
     </PropertyGroup>
     
     <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
-        <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">js</RuntimeIdentifier>
-        <TargetPlatformIdentifier Condition="'$(RuntimeIdentifier)' == 'js'">js</TargetPlatformIdentifier>
+        <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == '' or '$(RuntimeIdentifier)' == 'js'">javascript</RuntimeIdentifier>
+        <TargetPlatformIdentifier Condition="'$(RuntimeIdentifier)' == 'javascript'">javascript</TargetPlatformIdentifier>
     </PropertyGroup>
     
 <!--    <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable' and '$(TargetPlatformIdentifier)' == 'javascript'">-->

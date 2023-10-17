@@ -1,6 +1,7 @@
 <Project>
     <PropertyGroup>
         <EnableFableCompilerLogFile>false</EnableFableCompilerLogFile>
+<!--        <FableNoRestore>true</FableNoRestore>-->
     </PropertyGroup>
     
     <PropertyGroup>

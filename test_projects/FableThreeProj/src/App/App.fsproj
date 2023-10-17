@@ -1,10 +1,15 @@
-<Project Sdk="Fable.Sdk/0.0.1">
+<Project Sdk="Fable.Sdk/0.0.1" InitialTargets="SetFableBundleCommand">
   <PropertyGroup>
     <TargetFramework>fable4.0</TargetFramework>
     <NoWarn>NU1701</NoWarn>
     <FableRestoreCommand>yarn install</FableRestoreCommand>
-    <FableBundleCommand>webpack</FableBundleCommand>
   </PropertyGroup>
+  <Target Name="SetFableBundleCommand">
+    <PropertyGroup>
+      <!-- Can't access OutDir in the main PropertyGroup, as it is a derived property and gets set later on -->
+      <FableRun>webpack --env inputDir=$([System.IO.Path]::Combine($(MSBuildProjectDirectory),$(OutDir)))</FableRun>
+    </PropertyGroup>
+  </Target>
   <ItemGroup>
     <Compile Include="App.fs" />
     <Content Include="webpack.config.js" />
