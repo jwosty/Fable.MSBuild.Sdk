@@ -1,7 +1,5 @@
 <Project Sdk="Fable.Sdk/0.0.1" InitialTargets="SetFableBundleCommand">
   <PropertyGroup>
-<!--    <TargetFramework>netstandard2.0</TargetFramework>-->
-<!--    <TargetFrameworks>netstandard2.0;fable4</TargetFrameworks>-->
     <TargetFramework>fable4.0</TargetFramework>
     <NoWarn>NU1701</NoWarn>
     <FableRestoreCommand>yarn install</FableRestoreCommand>
@@ -16,7 +14,6 @@
     <Compile Include="App.fs" />
     <Content Include="webpack.config.js" />
     <Content Include="public\fable.ico" />
-<!--    <Content Include="public\bundle.js" />-->
     <Content Include="public\index.html" />
   </ItemGroup>
   <ItemGroup>
