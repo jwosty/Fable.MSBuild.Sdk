@@ -1,6 +1,6 @@
 <Project Sdk="Fable.Sdk/0.0.1" InitialTargets="SetFableBundleCommand">
   <PropertyGroup>
-    <TargetFramework>fable4.0</TargetFramework>
+    <TargetFramework>fable4.0-javascript</TargetFramework>
     <NoWarn>NU1701</NoWarn>
     <FableRestoreCommand>yarn install</FableRestoreCommand>
     <FableBundleCommand>webpack</FableBundleCommand>

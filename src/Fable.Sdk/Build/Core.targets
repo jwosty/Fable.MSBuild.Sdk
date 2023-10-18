@@ -1,24 +1,22 @@
 <Project>
     <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
-        <IntermediateFableFsproj Condition="'$(IntermediateFableFsproj)' == ''">$(BaseIntermediateOutputPath)\$(MSBuildProjectFile)</IntermediateFableFsproj>
+        <FableIntermediateFsproj Condition="'$(FableIntermediateFsproj)' == ''">$(BaseIntermediateOutputPath)\$(MSBuildProjectFile)</FableIntermediateFsproj>
         <_FableToolPkgBaseDir Condition="'$(FablePkgBaseDir)' == ''">$(MSBuildThisFileDirectory)..\tools\fable\</_FableToolPkgBaseDir>
         <FableToolDll Condition="'$(FableToolDll)' == ''">$(_FableToolPkgBaseDir)\tools\net6.0\any\fable.dll</FableToolDll>
         <FableCompilerLogFile Condition="'$(EnableFableCompilerLogFile)' == 'true'">$(BaseIntermediateOutputPath)\fable-log.txt</FableCompilerLogFile>
     </PropertyGroup>
     
     <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
+        <FableTargetLanguage Condition="'$(FableTargetLanguage)' == ''">$(TargetPlatformIdentifier)</FableTargetLanguage>
+        
         <AssetTargetFallback>$(AssetTargetFallback);netstandard2.1;netstandard2.0;net7.0;net6.0;net5.0</AssetTargetFallback>
         <_EnableDefaultWindowsPlatform>false</_EnableDefaultWindowsPlatform>
         <!-- Prevent the .NET SDK from attempting to include mscorlib.dll -->
         <NoStdLib Condition="'$(NoStdLib)' == ''">true</NoStdLib>
     </PropertyGroup>
     
-    <PropertyGroup>
-        <TargetLanguage Condition="'$(TargetLanguage)' == ''">$(RuntimeIdentifier)</TargetLanguage>
-    </PropertyGroup>
-    
-    <Target Name="_CheckTargetLanguage" BeforeTargets="Restore">
-        <Error Condition="'$(TargetLanguage)' == ''" Text="Missing TargetLanguage property!" />
+    <Target Name="_CheckFableTargetLanguage" BeforeTargets="Restore;Build;Publish;Pack">
+        <Error Condition="'$(FableTargetLanguage)' == ''" Text="Missing FableTargetLanguage property!" />
     </Target>
     
     <PropertyGroup Condition="'$(FableBundleCommand)' != ''">
@@ -34,33 +32,33 @@
     <UsingTask TaskName="Fable.Sdk.Tasks.GenerateFableFsproj" AssemblyFile="$(_FableSdkTasksPath)" />
     <UsingTask TaskName="Fable.Sdk.Tasks.FableCompile" AssemblyFile="$(_FableSdkTasksPath)" />
     
-<!--    <Target Name="_MyCustomTarget" BeforeTargets="_CheckForUnsupportedTargetPlatformIdentifier">-->
-<!--        <Message Importance="high" Text="TargetFramework = $(TargetFramework)" />-->
-<!--        <Message Importance="high" Text="TargetFrameworkIdentifier = $(TargetFrameworkIdentifier)" />-->
-<!--        <Message Importance="high" Text="TargetFrameworkVersion = $(TargetFrameworkVersion)" />-->
-<!--        <Message Importance="high" Text="TargetPlatformIdentifier = $(TargetPlatformIdentifier)" />-->
-<!--        <Message Importance="high" Text="TargetPlatformVersion = $(TargetPlatformVersion)" />-->
-<!--        <Message Importance="high" Text="RuntimeIdentifier = $(RuntimeIdentifier)" />-->
-<!--    </Target>-->
+    <Target Name="_MyCustomTarget" BeforeTargets="_CheckForUnsupportedTargetPlatformIdentifier">
+        <Message Importance="high" Text="TargetFramework = $(TargetFramework)" />
+        <Message Importance="high" Text="TargetFrameworkIdentifier = $(TargetFrameworkIdentifier)" />
+        <Message Importance="high" Text="TargetFrameworkVersion = $(TargetFrameworkVersion)" />
+        <Message Importance="high" Text="TargetPlatformIdentifier = $(TargetPlatformIdentifier)" />
+        <Message Importance="high" Text="TargetPlatformVersion = $(TargetPlatformVersion)" />
+        <Message Importance="high" Text="RuntimeIdentifier = $(RuntimeIdentifier)" />
+    </Target>
     
     <Target Name="FableRestore" AfterTargets="Restore" Condition="'$(FableRestoreCommand)' != ''">
         <Exec Command="$(FableRestoreCommand)" />
     </Target>
     
     <Target
-            Name="GenerateIntermediateFableFsproj"
+            Name="GenerateFableIntermediateFsproj"
             Inputs="@(CompileBefore);@(Compile);@(CompileAfter)"
-            Outputs="$(IntermediateFableFsproj)">
+            Outputs="$(FableIntermediateFsproj)">
         <GenerateFableFsproj
             Sources="@(CompileBefore);@(Compile);@(CompileAfter)"
             PackageReferences="@(PackageReference)"
             ProjectReferences="@(ProjectReference)"
-            OutputFsproj="$(IntermediateFableFsproj)"
+            OutputFsproj="$(FableIntermediateFsproj)"
         />
     </Target>
     
     <PropertyGroup>
-        <CoreCompileDependsOn>$(CoreCompileDependsOn);GenerateIntermediateFableFsproj</CoreCompileDependsOn>
+        <CoreCompileDependsOn>$(CoreCompileDependsOn);GenerateFableIntermediateFsproj</CoreCompileDependsOn>
     </PropertyGroup>
     
     <Target Name="CoreCompile" DependsOnTargets="$(CoreCompileDependsOn)">
@@ -68,9 +66,9 @@
         <!-- Append tmp to OutDir because the fsproj which Fable is compiling is one directory down (./obj/App.fsproj), and
              takes those relative links into account (<Compile Include="../SomeFile.fs" />) when resolving output paths -->
         <FableCompile
-                InputFsproj="$(IntermediateFableFsproj)"
+                InputFsproj="$(FableIntermediateFsproj)"
                 FableToolDll="$(FableToolDll)"
-                Language="$(TargetLanguage)"
+                Language="$(FableTargetLanguage)"
                 NoRestore="$(FableNoRestore)"
                 OutDir="$(MSBuildProjectDirectory)\$(OutDir)\tmp"
                 Run="$(FableRun)"

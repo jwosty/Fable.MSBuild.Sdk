@@ -124,13 +124,6 @@ type FableCompile() =
                     | compilerLogFile ->
                         Some (TextWriter.Synchronized (new StreamWriter(File.OpenWrite compilerLogFile, AutoFlush = true)))
                 
-                // let args =
-                //     let sb = StringBuilder()
-                //     sb.Append(this.FableToolDll).Append(' ').Append(this.InputFsproj) |> ignore
-                //     if not (String.IsNullOrWhiteSpace this.OtherFlags) then
-                //         sb.Append(' ').Append(this.OtherFlags) |> ignore
-                //     sb.ToString ()
-                
                 let args =
                     [
                         this.FableToolDll
@@ -139,6 +132,9 @@ type FableCompile() =
                             "--outDir"
                             this.OutDir
                         if this.NoRestore then "--noRestore"
+                        if not (String.IsNullOrWhiteSpace this.Language) then
+                            "--language"
+                            this.Language
                         if not (String.IsNullOrWhiteSpace this.OtherFlags) then this.OtherFlags
                         if not (String.IsNullOrWhiteSpace this.Run) then
                             "--run"

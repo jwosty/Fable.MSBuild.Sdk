@@ -1,13 +1,38 @@
 <Project>
-    <PropertyGroup Condition="'$(TargetFramework)' == 'fable4.0'">
+    <PropertyGroup Condition="$(TargetFramework.StartsWith('fable4.0'))">
         <TargetFrameworkIdentifier>Fable</TargetFrameworkIdentifier>
         <TargetFrameworkVersion>4.0</TargetFrameworkVersion>
+        <_TargetPlatformRaw>$(TargetFramework.Substring($([MSBuild]::Add($(TargetFramework.IndexOf('-')), 1))))</_TargetPlatformRaw>
     </PropertyGroup>
     
     <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
-        <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == '' or '$(RuntimeIdentifier)' == 'js'">javascript</RuntimeIdentifier>
-        <TargetPlatformIdentifier Condition="'$(RuntimeIdentifier)' == 'javascript'">javascript</TargetPlatformIdentifier>
+        <TargetFrameworkIdentifier>Fable</TargetFrameworkIdentifier>
+        <TargetFrameworkVersion>4.0</TargetFrameworkVersion>
+        <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)' == 'Windows'" />
+        <TargetPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'Windows'">0.0</TargetPlatformVersion>
     </PropertyGroup>
+    
+    <PropertyGroup>
+        <_RecognizedFableTPIs>javascript;typescript</_RecognizedFableTPIs>
+    </PropertyGroup>
+    
+    <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable' and $(_RecognizedFableTPIs.Contains('$(_TargetPlatformRaw)'))">
+        <TargetPlatformIdentifier>$(_TargetPlatformRaw)</TargetPlatformIdentifier>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable' and '$(_TargetPlatformRaw)' == 'javascript'">
+        <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">es3</RuntimeIdentifier>
+    </PropertyGroup>
+    
+    <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable' and '$(_TargetPlatformRaw)' == 'typescript'">
+        <TargetPlatformIdentifier>$(_TargetPlatformRaw)</TargetPlatformIdentifier>
+        <TargetPlatformVersion>0.0</TargetPlatformVersion>
+    </PropertyGroup>
+    
+<!--    <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">-->
+<!--        <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == '' or '$(RuntimeIdentifier)' == 'js'">javascript</RuntimeIdentifier>-->
+<!--        <TargetPlatformIdentifier Condition="'$(RuntimeIdentifier)' == 'javascript'">javascript</TargetPlatformIdentifier>-->
+<!--    </PropertyGroup>-->
     
 <!--    <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable' and '$(TargetPlatformIdentifier)' == 'javascript'">-->
 <!--        <SupportedPlatform Remove="@(SupportedPlatform)" />-->
