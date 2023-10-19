@@ -15,7 +15,7 @@
         <NoStdLib Condition="'$(NoStdLib)' == ''">true</NoStdLib>
     </PropertyGroup>
     
-    <Target Name="_CheckFableTargetLanguage" BeforeTargets="Restore;Build;Publish;Pack">
+    <Target Name="_CheckFableTargetLanguage" BeforeTargets="Restore;Build;Publish;Pack" Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
         <Error Condition="'$(FableTargetLanguage)' == ''" Text="Missing FableTargetLanguage property!" />
     </Target>
     
@@ -39,9 +39,11 @@
         <Message Importance="high" Text="TargetPlatformIdentifier = $(TargetPlatformIdentifier)" />
         <Message Importance="high" Text="TargetPlatformVersion = $(TargetPlatformVersion)" />
         <Message Importance="high" Text="RuntimeIdentifier = $(RuntimeIdentifier)" />
+        <Message Importance="high" Text="FableTargetLanguage = $(FableTargetLanguage)" />
     </Target>
     
     <Target Name="FableRestore" AfterTargets="Restore" Condition="'$(FableRestoreCommand)' != ''">
+        <Message Importance="high" Text="Running: $(FableRestoreCommand)" />
         <Exec Command="$(FableRestoreCommand)" />
     </Target>
     

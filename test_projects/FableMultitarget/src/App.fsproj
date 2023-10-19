@@ -1,0 +1,12 @@
+<Project Sdk="Fable.Sdk/0.0.1">
+  <PropertyGroup>
+    <TargetFrameworks>fable4.0-javascript;fable4.0-typescript</TargetFrameworks>
+    <NoWarn>NU1701</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="App.fs" />
+    <Content Include="webpack.config.js" />
+    <Content Include="public\fable.ico" />
+    <Content Include="public\index.html" />
+  </ItemGroup>
+</Project>

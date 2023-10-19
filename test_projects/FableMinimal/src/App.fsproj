@@ -3,7 +3,6 @@
     <TargetFramework>fable4.0-javascript</TargetFramework>
     <NoWarn>NU1701</NoWarn>
     <FableRestoreCommand>yarn install</FableRestoreCommand>
-    <FableBundleCommand>webpack</FableBundleCommand>
   </PropertyGroup>
   <Target Name="SetFableBundleCommand">
     <PropertyGroup>

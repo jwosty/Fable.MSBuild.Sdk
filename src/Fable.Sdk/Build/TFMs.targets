@@ -8,8 +8,8 @@
     <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">
         <TargetFrameworkIdentifier>Fable</TargetFrameworkIdentifier>
         <TargetFrameworkVersion>4.0</TargetFrameworkVersion>
-        <TargetPlatformIdentifier Condition="'$(TargetPlatformIdentifier)' == 'Windows'" />
-        <TargetPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'Windows'">0.0</TargetPlatformVersion>
+        <TargetPlatformIdentifier />
+        <TargetPlatformVersion>0.0</TargetPlatformVersion>
     </PropertyGroup>
     
     <PropertyGroup>
@@ -26,7 +26,6 @@
     
     <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable' and '$(_TargetPlatformRaw)' == 'typescript'">
         <TargetPlatformIdentifier>$(_TargetPlatformRaw)</TargetPlatformIdentifier>
-        <TargetPlatformVersion>0.0</TargetPlatformVersion>
     </PropertyGroup>
     
 <!--    <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' == 'Fable'">-->
