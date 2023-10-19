@@ -7,4 +7,4 @@ PROJ=test_projects/FableMultitarget/src/App.fsproj
 
 dotnet tool restore
 dotnet pack
-dotnet build "$PROJ" -v:d -bl:build2.binlog
+dotnet build "$PROJ"
